@@ -1,0 +1,14 @@
+.git
+.github
+.idea
+.vscode
+node_modules
+vendor
+var
+docker/data
+.env.local
+.env.*.local
+README.md
+*.md
+.DS_Store
+Thumbs.db
