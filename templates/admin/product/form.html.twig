@@ -1,0 +1,325 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% set isEdit = product is not null %}
+
+{% block title %}{{ isEdit ? 'Modifier ' ~ product.name : 'Nouveau produit' }}{% endblock %}
+{% block page_title %}{{ isEdit ? 'Modifier « ' ~ product.name ~ ' »' : 'Nouveau produit' }}{% endblock %}
+
+{% block admin_content %}
+
+{# Errors #}
+{% if errors is defined and errors|length > 0 %}
+<div class="mb-5 bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700 space-y-1">
+    {% for error in errors %}
+        <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            {{ error }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{# ===== MAIN FORM ===== #}
+<form method="POST" enctype="multipart/form-data" id="product-form" class="space-y-6">
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {# Left column — main fields #}
+        <div class="lg:col-span-2 space-y-5">
+
+            <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+                <h2 class="font-semibold text-gray-700 text-sm uppercase tracking-wide">Informations générales</h2>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nom <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" id="field-name" required
+                           value="{{ data.name ?? (isEdit ? product.name : '') }}"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Slug
+                        <span class="ml-1 text-xs text-gray-400 font-normal">(auto-généré si vide)</span>
+                    </label>
+                    <input type="text" name="slug" id="field-slug"
+                           value="{{ data.slug ?? (isEdit ? product.slug : '') }}"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Catégorie <span class="text-red-500">*</span></label>
+                    <select name="category" required
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent bg-white">
+                        <option value="">-- Choisir une catégorie --</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.id }}"
+                                {% if (data.categoryId ?? null) == cat.id or (isEdit and product.category and product.category.id == cat.id and (data.categoryId ?? null) is null) %}
+                                    selected
+                                {% endif %}>
+                                {{ cat.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if categories is empty %}
+                        <p class="mt-1 text-xs text-amber-600">
+                            <a href="{{ path('admin_category_create') }}" class="underline">Créer d'abord une catégorie</a>
+                        </p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea name="description" rows="4"
+                              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent resize-y">{{ data.description ?? (isEdit ? product.desciption : '') }}</textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Conseils de dégustation</label>
+                    <textarea name="tastingAdvice" rows="3"
+                              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent resize-y">{{ data.tastingAdvice ?? (isEdit ? product.tastingAdvice : '') }}</textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Allergènes</label>
+                    <input type="text" name="allergens"
+                           value="{{ data.allergens ?? (isEdit ? product.allergens : '') }}"
+                           placeholder="ex: peut contenir des traces de pollen"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent">
+                </div>
+            </div>
+
+            {# Variants #}
+            <div class="bg-white rounded-xl border border-gray-200 p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-semibold text-gray-700 text-sm uppercase tracking-wide">Variantes (poids)</h2>
+                    <button type="button" id="add-variant-btn"
+                            class="text-xs font-medium text-amber-600 hover:text-amber-800 flex items-center gap-1 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Ajouter une variante
+                    </button>
+                </div>
+
+                <table class="w-full text-sm" id="variants-table">
+                    <thead>
+                        <tr class="text-left text-xs font-medium text-gray-500 border-b border-gray-100">
+                            <th class="pb-2 pr-3">Poids (g)</th>
+                            <th class="pb-2 pr-3">Prix (€)</th>
+                            <th class="pb-2 pr-3">Stock</th>
+                            <th class="pb-2"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="variants-body">
+
+                        {# Existing variants (edit mode only) #}
+                        {% if isEdit %}
+                            {% for variant in product.productVariants %}
+                            <tr class="border-b border-gray-50" data-existing>
+                                <td class="py-2 pr-3">
+                                    <input type="number" name="existing_weight[{{ variant.id }}]"
+                                           value="{{ variant.weight }}" min="1" required
+                                           class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                                </td>
+                                <td class="py-2 pr-3">
+                                    <input type="number" name="existing_price[{{ variant.id }}]"
+                                           value="{{ variant.price }}" min="0" step="0.01" required
+                                           class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                                </td>
+                                <td class="py-2 pr-3">
+                                    <input type="number" name="existing_stock[{{ variant.id }}]"
+                                           value="{{ variant.stock }}" min="0" required
+                                           class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                                </td>
+                                <td class="py-2 text-right">
+                                    <button type="submit" form="delete-variant-{{ variant.id }}"
+                                            onclick="return confirm('Supprimer cette variante ?')"
+                                            class="text-xs text-red-500 hover:text-red-700 transition-colors font-medium">
+                                        Supprimer
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% endif %}
+
+                        {# New variant rows (JS-added) #}
+                        <tr id="no-variants-msg" class="{% if isEdit and product.productVariants|length > 0 %}hidden{% endif %}">
+                            <td colspan="4" class="py-3 text-sm text-gray-400 italic" id="no-variants-placeholder">
+                                Aucune variante. Cliquez sur « Ajouter » pour en créer.
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+                {# Hidden template row for new variants #}
+                <template id="variant-row-template">
+                    <tr class="border-b border-gray-50" data-new>
+                        <td class="py-2 pr-3">
+                            <input type="number" name="new_weight[]" placeholder="500" min="1"
+                                   class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                        </td>
+                        <td class="py-2 pr-3">
+                            <input type="number" name="new_price[]" placeholder="9.90" min="0" step="0.01"
+                                   class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                        </td>
+                        <td class="py-2 pr-3">
+                            <input type="number" name="new_stock[]" placeholder="10" min="0"
+                                   class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                        </td>
+                        <td class="py-2 text-right">
+                            <button type="button" class="remove-variant text-xs text-red-500 hover:text-red-700 font-medium transition-colors">
+                                Retirer
+                            </button>
+                        </td>
+                    </tr>
+                </template>
+            </div>
+
+        </div>
+
+        {# Right column — image + options #}
+        <div class="space-y-5">
+
+            <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+                <h2 class="font-semibold text-gray-700 text-sm uppercase tracking-wide">Image</h2>
+
+                {% if isEdit and product.image %}
+                    <div class="text-center">
+                        <img src="/uploads/products/{{ product.image }}"
+                             alt="{{ product.name }}"
+                             class="w-full max-h-48 object-contain rounded-lg border border-gray-200 mb-3">
+                        <p class="text-xs text-gray-400">Image actuelle — remplacer ci-dessous</p>
+                    </div>
+                {% endif %}
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ isEdit and product.image ? 'Nouvelle image' : 'Image du produit' }}
+                    </label>
+                    <input type="file" name="image" accept="image/jpeg,image/png,image/webp"
+                           class="w-full text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 transition-colors cursor-pointer">
+                    <p class="mt-1 text-xs text-gray-400">JPG, PNG ou WebP — max. 5 Mo</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+                <h2 class="font-semibold text-gray-700 text-sm uppercase tracking-wide">Prix de base</h2>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Prix (€) <span class="text-red-500">*</span></label>
+                    <div class="relative">
+                        <input type="number" name="price" min="0" step="0.01" required
+                               value="{{ data.price ?? (isEdit ? product.price : '') }}"
+                               class="w-full border border-gray-300 rounded-lg pl-3 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                        <span class="absolute right-3 top-2 text-sm text-gray-400">€</span>
+                    </div>
+                    <p class="mt-1 text-xs text-gray-400">Prix affiché dans le catalogue (« À partir de »)</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+                <h2 class="font-semibold text-gray-700 text-sm uppercase tracking-wide">Options</h2>
+
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" name="isBestSeller" value="1"
+                           {% if data.isBestSeller ?? (isEdit ? product.isBestSeller : false) %}checked{% endif %}
+                           class="h-4 w-4 rounded accent-amber-600">
+                    <span class="text-sm text-gray-700">Best-seller</span>
+                </label>
+
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" name="isOnSale" value="1"
+                           {% if data.isOnSale ?? (isEdit ? product.isOnSale : false) %}checked{% endif %}
+                           class="h-4 w-4 rounded accent-amber-600">
+                    <span class="text-sm text-gray-700">En promotion</span>
+                </label>
+            </div>
+
+            <div class="flex items-center justify-between gap-3">
+                <a href="{{ path('admin_product_index') }}"
+                   class="flex-1 text-center text-sm font-medium text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition-colors">
+                    Annuler
+                </a>
+                <button type="submit"
+                        class="flex-1 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+                    {{ isEdit ? 'Enregistrer' : 'Créer le produit' }}
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</form>
+
+{# ===== VARIANT DELETE FORMS (outside main form) ===== #}
+{% if isEdit %}
+    {% for variant in product.productVariants %}
+    <form id="delete-variant-{{ variant.id }}" method="POST"
+          action="{{ path('admin_product_delete_variant', {id: product.id, variantId: variant.id}) }}"
+          style="display:none">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete_variant_' ~ variant.id) }}">
+    </form>
+    {% endfor %}
+{% endif %}
+
+<script>
+(function () {
+    // Slug auto-generation
+    const nameField = document.getElementById('field-name');
+    const slugField = document.getElementById('field-slug');
+    let slugManuallyEdited = slugField.value !== '';
+
+    slugField.addEventListener('input', function () {
+        slugManuallyEdited = this.value !== '';
+    });
+
+    nameField.addEventListener('input', function () {
+        if (slugManuallyEdited) return;
+        slugField.value = this.value
+            .toLowerCase()
+            .normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    });
+
+    // Dynamic variant rows
+    const addBtn    = document.getElementById('add-variant-btn');
+    const template  = document.getElementById('variant-row-template');
+    const tbody     = document.getElementById('variants-body');
+    const noMsg     = document.getElementById('no-variants-msg');
+
+    function updateNoMsg() {
+        const hasRows = tbody.querySelectorAll('[data-new], [data-existing]').length > 0;
+        noMsg.classList.toggle('hidden', hasRows);
+    }
+
+    addBtn.addEventListener('click', function () {
+        const clone = template.content.cloneNode(true);
+        const row   = clone.querySelector('tr');
+        tbody.insertBefore(clone, noMsg);
+
+        row.querySelector('.remove-variant').addEventListener('click', function () {
+            row.remove();
+            updateNoMsg();
+        });
+
+        updateNoMsg();
+        row.querySelector('input').focus();
+    });
+
+    // Attach remove listeners to any rows that might already exist
+    document.querySelectorAll('[data-new] .remove-variant').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            btn.closest('tr').remove();
+            updateNoMsg();
+        });
+    });
+
+    updateNoMsg();
+})();
+</script>
+
+{% endblock %}

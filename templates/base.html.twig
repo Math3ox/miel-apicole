@@ -27,7 +27,7 @@
             {# Nav principale — cachée sur mobile #}
             <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-gray-600">
                 <a href="{{ path('app_home') }}" class="hover:text-amber-600 transition-colors">Accueil</a>
-                <a href="#" {# path('app_product_index') #} class="hover:text-amber-600 transition-colors">Nos miels</a>
+                <a href="{{ path('app_shop_index') }}" class="hover:text-amber-600 transition-colors">Nos miels</a>
                 <a href="#" class="hover:text-amber-600 transition-colors">À propos</a>
                 <a href="#" class="hover:text-amber-600 transition-colors">Contact</a>
             </nav>
@@ -54,7 +54,7 @@
                     <div class="hidden md:flex items-center gap-3 text-sm">
                         <span class="text-gray-500">Bonjour, <strong class="text-gray-700">{{ app.user.firstName }}</strong></span>
                         {% if is_granted('ROLE_ADMIN') %}
-                            <a href="#" {# path('admin_dashboard') #} class="text-amber-600 hover:text-amber-700 font-medium transition-colors">
+                            <a href="{{ path('admin_dashboard') }}" class="text-amber-600 hover:text-amber-700 font-medium transition-colors">
                                 Admin
                             </a>
                         {% endif %}
@@ -84,14 +84,14 @@
         {# Menu mobile dépliable #}
         <div id="mobile-menu" class="md:hidden hidden border-t border-amber-100 bg-white px-6 py-4 space-y-3 text-sm font-medium text-gray-700">
             <a href="{{ path('app_home') }}" class="block hover:text-amber-600">Accueil</a>
-            <a href="#" {# path('app_product_index') #} class="block hover:text-amber-600">Nos miels</a>
+            <a href="{{ path('app_shop_index') }}" class="block hover:text-amber-600">Nos miels</a>
             <a href="#" class="block hover:text-amber-600">À propos</a>
             <a href="#" class="block hover:text-amber-600">Contact</a>
             <hr class="border-amber-100">
             {% if app.user %}
                 <a href="#" {# path('app_account') #} class="block hover:text-amber-600">Mon compte</a>
                 {% if is_granted('ROLE_ADMIN') %}
-                    <a href="#" {# path('admin_dashboard') #} class="block text-amber-600 font-semibold">Admin</a>
+                    <a href="{{ path('admin_dashboard') }}" class="block text-amber-600 font-semibold">Admin</a>
                 {% endif %}
                 <a href="{{ path('app_logout') }}" class="block hover:text-amber-600">Déconnexion</a>
             {% else %}
@@ -135,7 +135,7 @@
             <div>
                 <h3 class="text-white font-semibold mb-3">Boutique</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="#" {# path('app_product_index') #} class="hover:text-amber-400 transition-colors">Tous nos miels</a></li>
+                    <li><a href="{{ path('app_shop_index') }}" class="hover:text-amber-400 transition-colors">Tous nos miels</a></li>
                     <li><a href="#" class="hover:text-amber-400 transition-colors">Nouveautés</a></li>
                     <li><a href="#" class="hover:text-amber-400 transition-colors">Meilleures ventes</a></li>
                 </ul>

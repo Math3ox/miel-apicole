@@ -1,0 +1,84 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% set isEdit = category is not null %}
+
+{% block title %}{{ isEdit ? 'Modifier ' ~ category.name : 'Nouvelle catégorie' }}{% endblock %}
+{% block page_title %}{{ isEdit ? 'Modifier « ' ~ category.name ~ ' »' : 'Nouvelle catégorie' }}{% endblock %}
+
+{% block admin_content %}
+
+{% if errors is defined and errors|length > 0 %}
+<div class="mb-5 bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700 space-y-1">
+    {% for error in errors %}
+        <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            {{ error }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="max-w-lg">
+    <form method="POST" class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nom <span class="text-red-500">*</span></label>
+            <input type="text" name="name" id="field-name" required
+                   value="{{ data.name ?? (isEdit ? category.name : '') }}"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent">
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+                Slug
+                <span class="ml-1 text-xs text-gray-400 font-normal">(auto-généré si vide)</span>
+            </label>
+            <input type="text" name="slug" id="field-slug"
+                   value="{{ data.slug ?? (isEdit ? category.slug : '') }}"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent">
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea name="description" rows="3"
+                      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent resize-y">{{ data.description ?? (isEdit ? category.description : '') }}</textarea>
+        </div>
+
+        <div class="flex items-center justify-between gap-3 pt-2">
+            <a href="{{ path('admin_category_index') }}"
+               class="flex-1 text-center text-sm font-medium text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg transition-colors">
+                Annuler
+            </a>
+            <button type="submit"
+                    class="flex-1 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors">
+                {{ isEdit ? 'Enregistrer' : 'Créer la catégorie' }}
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+(function () {
+    const nameField = document.getElementById('field-name');
+    const slugField = document.getElementById('field-slug');
+    let slugManuallyEdited = slugField.value !== '';
+
+    slugField.addEventListener('input', function () {
+        slugManuallyEdited = this.value !== '';
+    });
+
+    nameField.addEventListener('input', function () {
+        if (slugManuallyEdited) return;
+        slugField.value = this.value
+            .toLowerCase()
+            .normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    });
+})();
+</script>
+
+{% endblock %}

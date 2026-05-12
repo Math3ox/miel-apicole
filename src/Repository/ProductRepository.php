@@ -16,28 +16,34 @@ class ProductRepository extends ServiceEntityRepository
         parent::__construct($registry, Product::class);
     }
 
-    //    /**
-    //     * @return Product[] Returns an array of Product objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findForCatalogue(?string $categorySlug = null, string $sort = 'default'): array
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->leftJoin('p.category', 'c')->addSelect('c')
+            ->leftJoin('p.productVariants', 'v')->addSelect('v');
 
-    //    public function findOneBySomeField($value): ?Product
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        if ($categorySlug) {
+            $qb->andWhere('c.slug = :slug')->setParameter('slug', $categorySlug);
+        }
+
+        match ($sort) {
+            'price_asc'  => $qb->orderBy('p.price', 'ASC'),
+            'price_desc' => $qb->orderBy('p.price', 'DESC'),
+            'name'       => $qb->orderBy('p.name', 'ASC'),
+            default      => $qb->orderBy('p.createdAt', 'DESC'),
+        };
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findBySlugWithRelations(string $slug): ?Product
+    {
+        return $this->createQueryBuilder('p')
+            ->leftJoin('p.category', 'c')->addSelect('c')
+            ->leftJoin('p.productVariants', 'v')->addSelect('v')
+            ->andWhere('p.slug = :slug')->setParameter('slug', $slug)
+            ->orderBy('v.weight', 'ASC')
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }
