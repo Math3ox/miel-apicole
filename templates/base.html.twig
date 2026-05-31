@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Miel Apicole{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}Miels artisanaux récoltés avec passion, directement de nos ruches à votre table.{% endblock %}">
+    <meta name="robots" content="{% block meta_robots %}index, follow{% endblock %}">
+
+    {# URL canonique : évite le contenu dupliqué (ex. paramètres de tri/filtre). #}
+    {% set canonical_url = block('canonical') is defined and block('canonical')|trim ? block('canonical')|trim : app.request.schemeAndHttpHost ~ app.request.pathInfo %}
+    <link rel="canonical" href="{{ canonical_url }}">
+
+    {# Open Graph (partage Facebook, LinkedIn…) #}
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:site_name" content="Miel Apicole">
+    <meta property="og:title" content="{{ block('title') }}">
+    <meta property="og:description" content="{{ block('meta_description') }}">
+    <meta property="og:url" content="{{ canonical_url }}">
+    {% block og_extra %}{% endblock %}
+
+    {# Twitter Card #}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ block('title') }}">
+    <meta name="twitter:description" content="{{ block('meta_description') }}">
+
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍯</text></svg>">
     {% block stylesheets %}
         <link rel="stylesheet" href="/styles/app.css">
