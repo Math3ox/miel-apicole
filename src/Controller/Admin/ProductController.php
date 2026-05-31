@@ -227,7 +227,6 @@ class ProductController extends AbstractController
             }
         }
 
-        // New variants (new_weight[], new_price[], new_stock[])
         $allPost = $request->request->all();
         $weights = $allPost['new_weight'] ?? [];
         $prices  = $allPost['new_price']  ?? [];

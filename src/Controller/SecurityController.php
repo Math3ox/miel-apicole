@@ -25,6 +25,5 @@ class SecurityController extends AbstractController
     #[Route('/deconnexion', name: 'app_logout')]
     public function logout(): void
     {
-        // Intercepté par le firewall Symfony — cette méthode n'est jamais exécutée
     }
 }

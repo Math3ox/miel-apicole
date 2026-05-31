@@ -17,7 +17,6 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
-        {# Infos perso #}
         <div class="md:col-span-2 bg-white rounded-2xl border border-gray-200 p-6">
             <h2 class="font-bold text-gray-900 mb-4">Mes informations</h2>
             <dl class="space-y-2 text-sm">
@@ -36,7 +35,6 @@
             </dl>
         </div>
 
-        {# Compteur commandes #}
         <div class="bg-amber-600 text-white rounded-2xl p-6 flex flex-col justify-center">
             <span class="text-4xl font-bold">{{ orderCount }}</span>
             <span class="text-amber-100 text-sm mt-1">commande{{ orderCount > 1 ? 's' : '' }} passée{{ orderCount > 1 ? 's' : '' }}</span>
@@ -46,7 +44,6 @@
         </div>
     </div>
 
-    {# Dernières commandes #}
     <div class="flex items-center justify-between mb-4">
         <h2 class="font-bold text-gray-900">Dernières commandes</h2>
         {% if orderCount > 3 %}

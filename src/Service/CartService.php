@@ -47,7 +47,6 @@ class CartService
         return (int) array_sum($this->getRawCart());
     }
 
-    /** @return array<array{variant: \App\Entity\ProductVariant, quantity: int, subtotal: float}> */
     public function getFullCart(): array
     {
         $items = [];

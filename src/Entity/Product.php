@@ -50,15 +50,9 @@ class Product
     #[ORM\JoinColumn(nullable: false)]
     private ?Category $category = null;
 
-    /**
-     * @var Collection<int, ProductVariant>
-     */
     #[ORM\OneToMany(targetEntity: ProductVariant::class, mappedBy: 'product', orphanRemoval: true)]
     private Collection $productVariants;
 
-    /**
-     * @var Collection<int, Review>
-     */
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'product')]
     private Collection $reviews;
 
@@ -205,9 +199,6 @@ class Product
         return $this;
     }
 
-    /**
-     * @return Collection<int, ProductVariant>
-     */
     public function getProductVariants(): Collection
     {
         return $this->productVariants;
@@ -226,7 +217,6 @@ class Product
     public function removeProductVariant(ProductVariant $productVariant): static
     {
         if ($this->productVariants->removeElement($productVariant)) {
-            // set the owning side to null (unless already changed)
             if ($productVariant->getProduct() === $this) {
                 $productVariant->setProduct(null);
             }
@@ -235,9 +225,6 @@ class Product
         return $this;
     }
 
-    /**
-     * @return Collection<int, Review>
-     */
     public function getReviews(): Collection
     {
         return $this->reviews;
@@ -256,7 +243,6 @@ class Product
     public function removeReview(Review $review): static
     {
         if ($this->reviews->removeElement($review)) {
-            // set the owning side to null (unless already changed)
             if ($review->getProduct() === $this) {
                 $review->setProduct(null);
             }

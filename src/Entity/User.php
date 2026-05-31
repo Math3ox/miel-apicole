@@ -22,15 +22,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180)]
     private ?string $email = null;
 
-    /**
-     * @var list<string> The user roles
-     */
     #[ORM\Column]
     private array $roles = [];
 
-    /**
-     * @var string The hashed password
-     */
     #[ORM\Column]
     private ?string $password = null;
 
@@ -43,21 +37,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
     private ?\DateTimeImmutable $createdAt = null;
 
-    /**
-     * @var Collection<int, Address>
-     */
     #[ORM\OneToMany(targetEntity: Address::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $addresses;
 
-    /**
-     * @var Collection<int, Order>
-     */
     #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'user')]
     private Collection $orders;
 
-    /**
-     * @var Collection<int, Review>
-     */
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'user')]
     private Collection $reviews;
 
@@ -85,31 +70,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
-     */
     public function getUserIdentifier(): string
     {
         return (string) $this->email;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }
 
-    /**
-     * @param list<string> $roles
-     */
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
@@ -117,9 +90,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @see PasswordAuthenticatedUserInterface
-     */
     public function getPassword(): ?string
     {
         return $this->password;
@@ -132,9 +102,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
-     */
     public function __serialize(): array
     {
         $data = (array) $this;
@@ -146,7 +113,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[\Deprecated]
     public function eraseCredentials(): void
     {
-        // @deprecated, to be removed when upgrading to Symfony 8
     }
 
     public function getFirstName(): ?string
@@ -185,9 +151,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, Address>
-     */
     public function getAddresses(): Collection
     {
         return $this->addresses;
@@ -206,7 +169,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeAddress(Address $address): static
     {
         if ($this->addresses->removeElement($address)) {
-            // set the owning side to null (unless already changed)
             if ($address->getUser() === $this) {
                 $address->setUser(null);
             }
@@ -215,9 +177,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, Order>
-     */
     public function getOrders(): Collection
     {
         return $this->orders;
@@ -236,7 +195,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeOrder(Order $order): static
     {
         if ($this->orders->removeElement($order)) {
-            // set the owning side to null (unless already changed)
             if ($order->getUser() === $this) {
                 $order->setUser(null);
             }
@@ -245,9 +203,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, Review>
-     */
     public function getReviews(): Collection
     {
         return $this->reviews;
@@ -266,7 +221,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeReview(Review $review): static
     {
         if ($this->reviews->removeElement($review)) {
-            // set the owning side to null (unless already changed)
             if ($review->getUser() === $this) {
                 $review->setUser(null);
             }

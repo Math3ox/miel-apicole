@@ -51,9 +51,6 @@ class Order
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    /**
-     * @var Collection<int, OrderItem>
-     */
     #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'orderRef', orphanRemoval: true)]
     private Collection $orderItems;
 
@@ -145,9 +142,6 @@ class Order
         return $this;
     }
 
-    /**
-     * @return Collection<int, OrderItem>
-     */
     public function getOrderItems(): Collection
     {
         return $this->orderItems;
@@ -166,7 +160,6 @@ class Order
     public function removeOrderItem(OrderItem $orderItem): static
     {
         if ($this->orderItems->removeElement($orderItem)) {
-            // set the owning side to null (unless already changed)
             if ($orderItem->getOrderRef() === $this) {
                 $orderItem->setOrderRef(null);
             }

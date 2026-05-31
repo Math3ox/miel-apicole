@@ -13,7 +13,6 @@
 
 {% block body %}
 
-{# ===== BREADCRUMB ===== #}
 <nav class="max-w-6xl mx-auto px-6 pt-6 pb-2 text-sm text-gray-400 flex items-center gap-2">
     <a href="{{ path('app_home') }}" class="hover:text-amber-600 transition-colors">Accueil</a>
     <span>/</span>
@@ -28,11 +27,9 @@
     <span class="text-gray-600 font-medium truncate max-w-xs">{{ product.name }}</span>
 </nav>
 
-{# ===== FICHE PRODUIT ===== #}
 <section class="max-w-6xl mx-auto px-6 py-8">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
 
-        {# Image #}
         <div class="sticky top-24">
             {% if product.image %}
                 <img src="/uploads/products/{{ product.image }}"
@@ -47,10 +44,8 @@
             {% endif %}
         </div>
 
-        {# Infos + achat #}
         <div class="space-y-6">
 
-            {# En-tête #}
             <div>
                 <div class="flex flex-wrap items-center gap-2 mb-3">
                     {% if product.category %}
@@ -70,7 +65,6 @@
                     {{ product.name }}
                 </h1>
 
-                {# Note moyenne #}
                 {% if avgRating is not null %}
                     <div class="flex items-center gap-2 mb-3">
                         <div class="flex text-amber-400 text-sm">
@@ -84,7 +78,6 @@
                     </div>
                 {% endif %}
 
-                {# Prix affiché (mis à jour par JS selon variante) #}
                 <div class="text-3xl font-bold text-amber-700" id="display-price">
                     {% if product.productVariants|length > 0 %}
                         {{ product.productVariants|first.price|number_format(2, ',', ' ') }} €
@@ -94,14 +87,12 @@
                 </div>
             </div>
 
-            {# Description #}
             {% if product.desciption %}
                 <p class="text-gray-600 leading-relaxed text-sm">
                     {{ product.desciption }}
                 </p>
             {% endif %}
 
-            {# Sélecteur de variantes #}
             {% if product.productVariants|length > 0 %}
                 <div>
                     <p class="text-sm font-semibold text-gray-700 mb-3">Choisissez votre format :</p>
@@ -126,7 +117,6 @@
                         {% endfor %}
                     </div>
 
-                    {# Stock info #}
                     <p class="mt-3 text-xs" id="stock-info">
                         {% set firstVariant = product.productVariants|first %}
                         {% if firstVariant.stock > 5 %}
@@ -140,7 +130,6 @@
                 </div>
             {% endif %}
 
-            {# Bouton panier #}
             <form method="POST" action="{{ path('app_cart_add') }}" id="add-to-cart-form">
                 <input type="hidden" name="variant_id" id="selected-variant-id"
                        value="{{ product.productVariants|length > 0 ? product.productVariants|first.id : '' }}">
@@ -163,7 +152,6 @@
                 </button>
             </form>
 
-            {# Conseils dégustation #}
             {% if product.tastingAdvice %}
                 <div class="bg-amber-50 border border-amber-100 rounded-xl p-4">
                     <h3 class="text-sm font-semibold text-amber-800 mb-1.5 flex items-center gap-2">
@@ -173,7 +161,6 @@
                 </div>
             {% endif %}
 
-            {# Allergènes #}
             {% if product.allergens %}
                 <div class="text-xs text-gray-400 border-t border-gray-100 pt-4">
                     <span class="font-semibold text-gray-500">Allergènes :</span> {{ product.allergens }}
@@ -184,7 +171,6 @@
     </div>
 </section>
 
-{# ===== AVIS ===== #}
 <section class="max-w-6xl mx-auto px-6 py-10 border-t border-gray-100">
     <h2 class="text-xl font-bold text-gray-800 mb-6">
         Avis clients
@@ -220,7 +206,6 @@
         </div>
     {% endif %}
 
-    {# ===== FORMULAIRE D'AVIS ===== #}
     <div class="mt-10 max-w-xl">
         <h3 class="font-bold text-gray-800 mb-4">Laisser un avis</h3>
         {% if app.user %}
@@ -228,7 +213,6 @@
                   class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
                 <input type="hidden" name="_token" value="{{ csrf_token('review_add_' ~ product.id) }}">
 
-                {# Note en étoiles (radios inversés pour effet survol) #}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">Votre note</label>
                     <div class="inline-flex flex-row-reverse gap-1 text-2xl" id="rating-stars">
@@ -293,12 +277,10 @@
         const price = parseFloat(radio.dataset.price);
         const stock = parseInt(radio.dataset.stock, 10);
 
-        // Price
         priceEl.textContent = price.toLocaleString('fr-FR', {
             minimumFractionDigits: 2, maximumFractionDigits: 2
         }) + ' €';
 
-        // Stock label
         if (stock > 5) {
             stockEl.innerHTML = '<span class="text-green-600 font-medium">✓ En stock</span>';
         } else if (stock > 0) {
@@ -307,7 +289,6 @@
             stockEl.innerHTML = '<span class="text-red-500 font-medium">✗ Rupture de stock</span>';
         }
 
-        // Cart button state
         if (addBtn) {
             if (stock === 0) {
                 addBtn.disabled = true;
@@ -324,7 +305,6 @@
             }
         }
 
-        // Hidden input
         if (variantIn) variantIn.value = radio.value;
     }
 
@@ -334,7 +314,6 @@
         });
     });
 
-    // Init with checked radio
     const checked = document.querySelector('input[name="variant"]:checked');
     if (checked) updateVariant(checked);
 })();

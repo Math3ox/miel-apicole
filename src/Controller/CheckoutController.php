@@ -92,7 +92,6 @@ class CheckoutController extends AbstractController
 
                 $cart->clear();
 
-                // Envoi manuel de l'e-mail de confirmation (facture PDF jointe), sans bloquer la commande.
                 try {
                     $mailer->sendOrderConfirmation($order);
                 } catch (\Throwable) {

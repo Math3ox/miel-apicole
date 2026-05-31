@@ -68,7 +68,6 @@ class RegistrationController extends AbstractController
                 $em->persist($user);
                 $em->flush();
 
-                // Envoi manuel de l'e-mail de bienvenue (sans bloquer l'inscription en cas d'échec SMTP).
                 try {
                     $mailer->sendWelcome($user);
                 } catch (\Throwable) {

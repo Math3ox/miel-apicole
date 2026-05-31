@@ -7,7 +7,6 @@
 
 {% block admin_content %}
 
-{# Errors #}
 {% if errors is defined and errors|length > 0 %}
 <div class="mb-5 bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700 space-y-1">
     {% for error in errors %}
@@ -21,12 +20,10 @@
 </div>
 {% endif %}
 
-{# ===== MAIN FORM ===== #}
 <form method="POST" enctype="multipart/form-data" id="product-form" class="space-y-6">
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {# Left column — main fields #}
         <div class="lg:col-span-2 space-y-5">
 
             <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
@@ -91,7 +88,6 @@
                 </div>
             </div>
 
-            {# Variants #}
             <div class="bg-white rounded-xl border border-gray-200 p-5">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="font-semibold text-gray-700 text-sm uppercase tracking-wide">Variantes (poids)</h2>
@@ -115,7 +111,6 @@
                     </thead>
                     <tbody id="variants-body">
 
-                        {# Existing variants (edit mode only) #}
                         {% if isEdit %}
                             {% for variant in product.productVariants %}
                             <tr class="border-b border-gray-50" data-existing>
@@ -145,7 +140,6 @@
                             {% endfor %}
                         {% endif %}
 
-                        {# New variant rows (JS-added) #}
                         <tr id="no-variants-msg" class="{% if isEdit and product.productVariants|length > 0 %}hidden{% endif %}">
                             <td colspan="4" class="py-3 text-sm text-gray-400 italic" id="no-variants-placeholder">
                                 Aucune variante. Cliquez sur « Ajouter » pour en créer.
@@ -155,7 +149,6 @@
                     </tbody>
                 </table>
 
-                {# Hidden template row for new variants #}
                 <template id="variant-row-template">
                     <tr class="border-b border-gray-50" data-new>
                         <td class="py-2 pr-3">
@@ -181,7 +174,6 @@
 
         </div>
 
-        {# Right column — image + options #}
         <div class="space-y-5">
 
             <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
@@ -254,7 +246,6 @@
 
 </form>
 
-{# ===== VARIANT DELETE FORMS (outside main form) ===== #}
 {% if isEdit %}
     {% for variant in product.productVariants %}
     <form id="delete-variant-{{ variant.id }}" method="POST"
@@ -267,7 +258,6 @@
 
 <script>
 (function () {
-    // Slug auto-generation
     const nameField = document.getElementById('field-name');
     const slugField = document.getElementById('field-slug');
     let slugManuallyEdited = slugField.value !== '';
@@ -285,7 +275,6 @@
             .replace(/^-+|-+$/g, '');
     });
 
-    // Dynamic variant rows
     const addBtn    = document.getElementById('add-variant-btn');
     const template  = document.getElementById('variant-row-template');
     const tbody     = document.getElementById('variants-body');
@@ -310,7 +299,6 @@
         row.querySelector('input').focus();
     });
 
-    // Attach remove listeners to any rows that might already exist
     document.querySelectorAll('[data-new] .remove-variant').forEach(function (btn) {
         btn.addEventListener('click', function () {
             btn.closest('tr').remove();

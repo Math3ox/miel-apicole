@@ -20,14 +20,12 @@
     {% else %}
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            {# ===== LISTE DES ARTICLES ===== #}
             <div class="lg:col-span-2 space-y-4">
                 {% for item in items %}
                     {% set variant = item.variant %}
                     {% set product = variant.product %}
                     <div class="bg-white rounded-2xl border border-gray-200 p-5 flex gap-4 items-start">
 
-                        {# Image #}
                         <a href="{{ path('app_shop_show', {slug: product.slug}) }}" class="shrink-0">
                             {% if product.image %}
                                 <img src="/uploads/products/{{ product.image }}"
@@ -42,7 +40,6 @@
                             {% endif %}
                         </a>
 
-                        {# Infos #}
                         <div class="flex-1 min-w-0">
                             <a href="{{ path('app_shop_show', {slug: product.slug}) }}" class="font-semibold text-gray-900 hover:text-amber-600 transition-colors text-sm leading-snug">
                                 {{ product.name }}
@@ -50,7 +47,6 @@
                             <p class="text-xs text-gray-400 mt-0.5">{{ variant.weight }} g — {{ variant.price|number_format(2, ',', ' ') }} €/unité</p>
 
                             <div class="flex items-center gap-3 mt-3">
-                                {# Quantité #}
                                 <form method="POST" action="{{ path('app_cart_update') }}" class="flex items-center gap-2">
                                     <input type="hidden" name="variant_id" value="{{ variant.id }}">
                                     <label class="sr-only" for="qty-{{ variant.id }}">Quantité</label>
@@ -63,7 +59,6 @@
                                     </select>
                                 </form>
 
-                                {# Supprimer #}
                                 <form method="POST" action="{{ path('app_cart_remove', {variantId: variant.id}) }}">
                                     <button type="submit" class="text-xs text-gray-400 hover:text-red-500 transition-colors underline underline-offset-2">
                                         Supprimer
@@ -72,14 +67,12 @@
                             </div>
                         </div>
 
-                        {# Sous-total #}
                         <div class="shrink-0 text-right">
                             <p class="font-bold text-gray-900">{{ item.subtotal|number_format(2, ',', ' ') }} €</p>
                         </div>
                     </div>
                 {% endfor %}
 
-                {# Vider le panier #}
                 <div class="text-right pt-1">
                     <form method="POST" action="{{ path('app_cart_clear') }}">
                         <button type="submit" class="text-xs text-gray-400 hover:text-red-500 transition-colors underline underline-offset-2">
@@ -89,7 +82,6 @@
                 </div>
             </div>
 
-            {# ===== RÉCAPITULATIF ===== #}
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-2xl border border-gray-200 p-6 sticky top-24">
                     <h2 class="font-bold text-gray-900 text-lg mb-5">Récapitulatif</h2>

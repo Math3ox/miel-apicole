@@ -8,23 +8,17 @@ use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 
-/**
- * Envoi manuel des e-mails transactionnels via le composant Mailer.
- * Aucun bundle auto-généré : on construit et envoie chaque message ici.
- */
 class MailerService
 {
-    private const FROM_EMAIL = 'contact@miel-apicole.fr';
-    private const FROM_NAME  = 'Miel Apicole';
+    private const FROM_EMAIL  = 'contact@miel-apicole.fr';
+    private const FROM_NAME   = 'Miel Apicole';
+    private const ADMIN_EMAIL = 'contact@miel-apicole.fr';
 
     public function __construct(
         private readonly MailerInterface $mailer,
         private readonly InvoiceGenerator $invoices,
     ) {}
 
-    /**
-     * E-mail de bienvenue après l'inscription.
-     */
     public function sendWelcome(User $user): void
     {
         $email = (new TemplatedEmail())
@@ -37,9 +31,6 @@ class MailerService
         $this->mailer->send($email);
     }
 
-    /**
-     * Confirmation de commande, avec la facture PDF en pièce jointe.
-     */
     public function sendOrderConfirmation(Order $order): void
     {
         $user = $order->getUser();
@@ -56,6 +47,24 @@ class MailerService
             $this->invoices->filename($order),
             'application/pdf',
         );
+
+        $this->mailer->send($email);
+    }
+
+    public function sendContactMessage(string $name, string $fromEmail, string $subject, string $message): void
+    {
+        $email = (new TemplatedEmail())
+            ->from(new Address(self::FROM_EMAIL, self::FROM_NAME))
+            ->to(self::ADMIN_EMAIL)
+            ->replyTo(new Address($fromEmail, $name))
+            ->subject('[Contact] ' . ($subject !== '' ? $subject : 'Nouveau message'))
+            ->htmlTemplate('emails/contact.html.twig')
+            ->context([
+                'name'    => $name,
+                'email'   => $fromEmail,
+                'subject' => $subject,
+                'message' => $message,
+            ]);
 
         $this->mailer->send($email);
     }

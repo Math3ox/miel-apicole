@@ -14,7 +14,6 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/admin/commandes', name: 'admin_order_')]
 class OrderController extends AbstractController
 {
-    /** Statuts autorisés et leur libellé français. */
     public const STATUSES = [
         'pending'   => 'En attente',
         'paid'      => 'Payée',

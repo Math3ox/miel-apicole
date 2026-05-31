@@ -18,11 +18,9 @@ class SitemapController extends AbstractController
     ): Response {
         $urls = [];
 
-        // Pages statiques.
         $urls[] = ['loc' => $this->abs('app_home'), 'priority' => '1.0'];
         $urls[] = ['loc' => $this->abs('app_shop_index'), 'priority' => '0.9'];
 
-        // Catégories (filtres du catalogue).
         foreach ($categoryRepo->findAll() as $category) {
             $urls[] = [
                 'loc'      => $this->generateUrl('app_shop_index', ['categorie' => $category->getSlug()], UrlGeneratorInterface::ABSOLUTE_URL),
@@ -30,7 +28,6 @@ class SitemapController extends AbstractController
             ];
         }
 
-        // Fiches produits.
         foreach ($productRepo->findAll() as $product) {
             $urls[] = [
                 'loc'      => $this->generateUrl('app_shop_show', ['slug' => $product->getSlug()], UrlGeneratorInterface::ABSOLUTE_URL),
