@@ -1,0 +1,140 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Finaliser ma commande{% endblock %}
+
+{% block body %}
+<div class="max-w-5xl mx-auto px-6 py-10">
+
+    <h1 class="text-2xl font-bold text-gray-900 mb-8">Finaliser ma commande</h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        {# ===== FORMULAIRE ADRESSE ===== #}
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-2xl border border-gray-200 p-6">
+                <h2 class="font-bold text-gray-900 text-lg mb-6">Adresse de livraison</h2>
+
+                <form method="POST" action="{{ path('app_checkout_index') }}" novalidate>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                        {# Prénom #}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="firstName">Prénom</label>
+                            <input type="text" id="firstName" name="firstName"
+                                   value="{{ data.firstName }}"
+                                   class="w-full border rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-300 {{ errors.firstName is defined ? 'border-red-400 bg-red-50' : 'border-gray-200' }}">
+                            {% if errors.firstName is defined %}
+                                <p class="text-red-500 text-xs mt-1">{{ errors.firstName }}</p>
+                            {% endif %}
+                        </div>
+
+                        {# Nom #}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="lastName">Nom</label>
+                            <input type="text" id="lastName" name="lastName"
+                                   value="{{ data.lastName }}"
+                                   class="w-full border rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-300 {{ errors.lastName is defined ? 'border-red-400 bg-red-50' : 'border-gray-200' }}">
+                            {% if errors.lastName is defined %}
+                                <p class="text-red-500 text-xs mt-1">{{ errors.lastName }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {# Adresse #}
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5" for="street">Adresse</label>
+                        <input type="text" id="street" name="street"
+                               value="{{ data.street }}"
+                               placeholder="12 rue des Fleurs"
+                               class="w-full border rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-300 {{ errors.street is defined ? 'border-red-400 bg-red-50' : 'border-gray-200' }}">
+                        {% if errors.street is defined %}
+                            <p class="text-red-500 text-xs mt-1">{{ errors.street }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                        {# Code postal #}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="postalCode">Code postal</label>
+                            <input type="text" id="postalCode" name="postalCode"
+                                   value="{{ data.postalCode }}"
+                                   placeholder="75001"
+                                   class="w-full border rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-300 {{ errors.postalCode is defined ? 'border-red-400 bg-red-50' : 'border-gray-200' }}">
+                            {% if errors.postalCode is defined %}
+                                <p class="text-red-500 text-xs mt-1">{{ errors.postalCode }}</p>
+                            {% endif %}
+                        </div>
+
+                        {# Ville #}
+                        <div class="sm:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5" for="city">Ville</label>
+                            <input type="text" id="city" name="city"
+                                   value="{{ data.city }}"
+                                   placeholder="Paris"
+                                   class="w-full border rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-300 {{ errors.city is defined ? 'border-red-400 bg-red-50' : 'border-gray-200' }}">
+                            {% if errors.city is defined %}
+                                <p class="text-red-500 text-xs mt-1">{{ errors.city }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {# Pays #}
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5" for="country">Pays</label>
+                        <select id="country" name="country"
+                                class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-amber-300">
+                            {% set countries = ['France', 'Belgique', 'Suisse', 'Luxembourg', 'Canada'] %}
+                            {% for c in countries %}
+                                <option value="{{ c }}" {{ data.country == c ? 'selected' }}>{{ c }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit"
+                            class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3.5 rounded-xl transition-colors shadow-sm text-sm">
+                        Confirmer la commande — {{ total|number_format(2, ',', ' ') }} €
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {# ===== RÉCAPITULATIF ===== #}
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-2xl border border-gray-200 p-6 sticky top-24">
+                <h2 class="font-bold text-gray-900 text-base mb-4">Votre commande</h2>
+
+                <div class="space-y-3 text-sm">
+                    {% for item in items %}
+                        <div class="flex gap-3 items-center">
+                            {% if item.variant.product.image %}
+                                <img src="/uploads/products/{{ item.variant.product.image }}"
+                                     class="w-10 h-10 rounded-lg object-cover shrink-0 border border-gray-100"
+                                     alt="{{ item.variant.product.name }}">
+                            {% else %}
+                                <div class="w-10 h-10 rounded-lg bg-amber-50 border border-amber-100 shrink-0"></div>
+                            {% endif %}
+                            <div class="flex-1 min-w-0">
+                                <p class="font-medium text-gray-800 truncate">{{ item.variant.product.name }}</p>
+                                <p class="text-xs text-gray-400">{{ item.variant.weight }}g × {{ item.quantity }}</p>
+                            </div>
+                            <span class="shrink-0 font-semibold text-gray-800">{{ item.subtotal|number_format(2, ',', ' ') }} €</span>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="border-t border-gray-100 mt-4 pt-4">
+                    <div class="flex justify-between font-bold text-gray-900">
+                        <span>Total</span>
+                        <span class="text-amber-700">{{ total|number_format(2, ',', ' ') }} €</span>
+                    </div>
+                </div>
+
+                <a href="{{ path('app_cart_index') }}" class="block text-center text-xs text-gray-400 hover:text-amber-600 mt-3 transition-colors">
+                    Modifier le panier
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

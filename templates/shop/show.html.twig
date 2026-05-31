@@ -211,6 +211,64 @@
             {% endfor %}
         </div>
     {% endif %}
+
+    {# ===== FORMULAIRE D'AVIS ===== #}
+    <div class="mt-10 max-w-xl">
+        <h3 class="font-bold text-gray-800 mb-4">Laisser un avis</h3>
+        {% if app.user %}
+            <form method="POST" action="{{ path('app_review_add', { id: product.id }) }}"
+                  class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+                <input type="hidden" name="_token" value="{{ csrf_token('review_add_' ~ product.id) }}">
+
+                {# Note en étoiles (radios inversés pour effet survol) #}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Votre note</label>
+                    <div class="inline-flex flex-row-reverse gap-1 text-2xl" id="rating-stars">
+                        {% for i in 5..1 %}
+                            <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" class="sr-only peer/star{{ i }}" {{ i == 5 ? 'checked' }}>
+                            <label for="star{{ i }}" class="cursor-pointer text-gray-300 hover:text-amber-400 transition-colors" title="{{ i }}/5">★</label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div>
+                    <label for="comment" class="block text-sm font-medium text-gray-700 mb-1.5">Votre commentaire <span class="text-gray-400 font-normal">(optionnel)</span></label>
+                    <textarea name="comment" id="comment" rows="3"
+                              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                              placeholder="Partagez votre expérience…"></textarea>
+                </div>
+
+                <button type="submit"
+                        class="bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
+                    Publier mon avis
+                </button>
+                <p class="text-xs text-gray-400">Votre avis sera publié après validation par notre équipe.</p>
+            </form>
+
+            <script>
+            (function () {
+                const stars = document.querySelectorAll('#rating-stars label');
+                const inputs = document.querySelectorAll('#rating-stars input');
+                function paint() {
+                    let selected = 0;
+                    inputs.forEach(function (i) { if (i.checked) selected = parseInt(i.value, 10); });
+                    stars.forEach(function (lbl) {
+                        const val = parseInt(lbl.getAttribute('for').replace('star', ''), 10);
+                        lbl.classList.toggle('text-amber-400', val <= selected);
+                        lbl.classList.toggle('text-gray-300', val > selected);
+                    });
+                }
+                inputs.forEach(function (i) { i.addEventListener('change', paint); });
+                paint();
+            })();
+            </script>
+        {% else %}
+            <div class="bg-amber-50 border border-amber-100 rounded-xl p-5 text-sm text-amber-900">
+                <a href="{{ path('app_login') }}" class="font-semibold underline hover:no-underline">Connectez-vous</a>
+                pour laisser un avis sur ce produit.
+            </div>
+        {% endif %}
+    </div>
 </section>
 
 <script>

@@ -29,6 +29,24 @@ class Order
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $deliveryFirstName = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $deliveryLastName = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $deliveryStreet = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $deliveryCity = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $deliveryPostalCode = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $deliveryCountry = null;
+
     #[ORM\ManyToOne(inversedBy: 'orders')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
@@ -96,6 +114,24 @@ class Order
 
         return $this;
     }
+
+    public function getDeliveryFirstName(): ?string { return $this->deliveryFirstName; }
+    public function setDeliveryFirstName(string $v): static { $this->deliveryFirstName = $v; return $this; }
+
+    public function getDeliveryLastName(): ?string { return $this->deliveryLastName; }
+    public function setDeliveryLastName(string $v): static { $this->deliveryLastName = $v; return $this; }
+
+    public function getDeliveryStreet(): ?string { return $this->deliveryStreet; }
+    public function setDeliveryStreet(string $v): static { $this->deliveryStreet = $v; return $this; }
+
+    public function getDeliveryCity(): ?string { return $this->deliveryCity; }
+    public function setDeliveryCity(string $v): static { $this->deliveryCity = $v; return $this; }
+
+    public function getDeliveryPostalCode(): ?string { return $this->deliveryPostalCode; }
+    public function setDeliveryPostalCode(string $v): static { $this->deliveryPostalCode = $v; return $this; }
+
+    public function getDeliveryCountry(): ?string { return $this->deliveryCountry; }
+    public function setDeliveryCountry(string $v): static { $this->deliveryCountry = $v; return $this; }
 
     public function getUser(): ?User
     {

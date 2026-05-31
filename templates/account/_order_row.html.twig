@@ -1,0 +1,33 @@
+{% set statusLabels = {
+    pending:   'En attente',
+    paid:      'Payée',
+    shipped:   'Expédiée',
+    delivered: 'Livrée',
+    cancelled: 'Annulée'
+} %}
+{% set statusStyles = {
+    pending:   'bg-amber-100 text-amber-800',
+    paid:      'bg-blue-100 text-blue-800',
+    shipped:   'bg-indigo-100 text-indigo-800',
+    delivered: 'bg-green-100 text-green-800',
+    cancelled: 'bg-red-100 text-red-800'
+} %}
+
+<a href="{{ path('app_account_order_show', { id: order.id }) }}"
+   class="flex items-center justify-between bg-white rounded-2xl border border-gray-200 p-5 hover:border-amber-300 hover:shadow-sm transition">
+    <div>
+        <div class="flex items-center gap-3 mb-1">
+            <span class="font-semibold text-gray-900">Commande #{{ order.id }}</span>
+            <span class="text-xs font-medium px-2 py-0.5 rounded-full {{ statusStyles[order.status]|default('bg-gray-100 text-gray-700') }}">
+                {{ statusLabels[order.status]|default(order.status) }}
+            </span>
+        </div>
+        <p class="text-sm text-gray-500">
+            {{ order.createdAt|date('d/m/Y') }} · {{ order.orderItems|length }} article{{ order.orderItems|length > 1 ? 's' : '' }}
+        </p>
+    </div>
+    <div class="text-right">
+        <span class="font-bold text-amber-700">{{ order.totalPrice|number_format(2, ',', ' ') }} €</span>
+        <span class="block text-xs text-gray-400 mt-1">Détails →</span>
+    </div>
+</a>

@@ -1,0 +1,127 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Commande #{{ order.id }}{% endblock %}
+{% block page_title %}Commande #{{ order.id }}{% endblock %}
+
+{% block admin_content %}
+{% set statusStyles = {
+    pending:   'bg-amber-100 text-amber-800',
+    paid:      'bg-blue-100 text-blue-800',
+    shipped:   'bg-indigo-100 text-indigo-800',
+    delivered: 'bg-green-100 text-green-800',
+    cancelled: 'bg-red-100 text-red-800'
+} %}
+
+<div class="mb-6">
+    <a href="{{ path('admin_order_index') }}" class="text-sm text-gray-500 hover:text-amber-600">← Retour aux commandes</a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    {# Colonne principale : articles #}
+    <div class="lg:col-span-2 space-y-6">
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 class="font-bold text-gray-900 mb-4">Articles commandés</h2>
+            <table class="w-full text-sm">
+                <thead class="text-gray-500 border-b border-gray-100">
+                    <tr>
+                        <th class="text-left pb-2 font-medium">Produit</th>
+                        <th class="text-right pb-2 font-medium">P.U.</th>
+                        <th class="text-right pb-2 font-medium">Qté</th>
+                        <th class="text-right pb-2 font-medium">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    {% for item in order.orderItems %}
+                    <tr>
+                        <td class="py-2.5 text-gray-700">
+                            {{ item.productVariant.product.name }}
+                            <span class="text-gray-400">({{ item.productVariant.weight }} g)</span>
+                        </td>
+                        <td class="py-2.5 text-right text-gray-600">{{ item.unitPrice|number_format(2, ',', ' ') }} €</td>
+                        <td class="py-2.5 text-right text-gray-600">{{ item.quantity }}</td>
+                        <td class="py-2.5 text-right font-medium text-gray-800">{{ (item.unitPrice * item.quantity)|number_format(2, ',', ' ') }} €</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="border-t border-gray-200 mt-3 pt-3 flex justify-between font-bold text-gray-900">
+                <span>Total</span>
+                <span class="text-amber-700">{{ order.totalPrice|number_format(2, ',', ' ') }} €</span>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 class="font-bold text-gray-900 mb-3">Adresse de livraison</h2>
+            <address class="text-sm text-gray-600 not-italic leading-relaxed">
+                {{ order.deliveryFirstName }} {{ order.deliveryLastName }}<br>
+                {{ order.deliveryStreet }}<br>
+                {{ order.deliveryPostalCode }} {{ order.deliveryCity }}<br>
+                {{ order.deliveryCountry }}
+            </address>
+        </div>
+    </div>
+
+    {# Colonne latérale : infos + statut #}
+    <div class="space-y-6">
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 class="font-bold text-gray-900 mb-4">Informations</h2>
+            <dl class="space-y-2.5 text-sm">
+                <div class="flex justify-between">
+                    <dt class="text-gray-500">Client</dt>
+                    <dd class="text-gray-800 font-medium">{{ order.user.firstName }} {{ order.user.lastName }}</dd>
+                </div>
+                <div class="flex justify-between">
+                    <dt class="text-gray-500">Email</dt>
+                    <dd class="text-gray-800">{{ order.user.email }}</dd>
+                </div>
+                <div class="flex justify-between">
+                    <dt class="text-gray-500">Passée le</dt>
+                    <dd class="text-gray-800">{{ order.createdAt|date('d/m/Y H:i') }}</dd>
+                </div>
+                {% if order.updatedAt %}
+                <div class="flex justify-between">
+                    <dt class="text-gray-500">Modifiée le</dt>
+                    <dd class="text-gray-800">{{ order.updatedAt|date('d/m/Y H:i') }}</dd>
+                </div>
+                {% endif %}
+                <div class="flex justify-between items-center">
+                    <dt class="text-gray-500">Statut actuel</dt>
+                    <dd>
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full {{ statusStyles[order.status]|default('bg-gray-100 text-gray-700') }}">
+                            {{ statuses[order.status]|default(order.status) }}
+                        </span>
+                    </dd>
+                </div>
+            </dl>
+        </div>
+
+        {# Changement de statut #}
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 class="font-bold text-gray-900 mb-4">Modifier le statut</h2>
+            <form method="POST" action="{{ path('admin_order_update_status', { id: order.id }) }}" class="space-y-3">
+                <input type="hidden" name="_token" value="{{ csrf_token('update_status_' ~ order.id) }}">
+                <select name="status"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500">
+                    {% for key, label in statuses %}
+                        <option value="{{ key }}" {{ order.status == key ? 'selected' : '' }}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit"
+                        class="w-full bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+                    Enregistrer
+                </button>
+            </form>
+        </div>
+
+        <a href="{{ path('admin_order_invoice', { id: order.id }) }}"
+           class="flex items-center justify-center gap-2 w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-medium px-4 py-2.5 rounded-lg transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Télécharger la facture
+        </a>
+    </div>
+
+</div>
+{% endblock %}

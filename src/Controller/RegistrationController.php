@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Service\MailerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,6 +18,7 @@ class RegistrationController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $hasher,
         EntityManagerInterface $em,
+        MailerService $mailer,
     ): Response {
         if ($this->getUser()) {
             return $this->redirectToRoute('app_home');
@@ -65,6 +67,12 @@ class RegistrationController extends AbstractController
 
                 $em->persist($user);
                 $em->flush();
+
+                // Envoi manuel de l'e-mail de bienvenue (sans bloquer l'inscription en cas d'échec SMTP).
+                try {
+                    $mailer->sendWelcome($user);
+                } catch (\Throwable) {
+                }
 
                 $this->addFlash('success', 'Compte créé avec succès ! Vous pouvez vous connecter.');
 

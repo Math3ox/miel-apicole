@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon compte{% endblock %}
+
+{% block body %}
+<div class="max-w-4xl mx-auto px-6 py-12">
+
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Bonjour {{ app.user.firstName }} 👋</h1>
+            <p class="text-gray-500 text-sm mt-1">Bienvenue dans votre espace personnel.</p>
+        </div>
+        <a href="{{ path('app_logout') }}"
+           class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors">
+            Déconnexion
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+        {# Infos perso #}
+        <div class="md:col-span-2 bg-white rounded-2xl border border-gray-200 p-6">
+            <h2 class="font-bold text-gray-900 mb-4">Mes informations</h2>
+            <dl class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <dt class="text-gray-500">Nom</dt>
+                    <dd class="text-gray-800 font-medium">{{ app.user.firstName }} {{ app.user.lastName }}</dd>
+                </div>
+                <div class="flex justify-between">
+                    <dt class="text-gray-500">Email</dt>
+                    <dd class="text-gray-800 font-medium">{{ app.user.email }}</dd>
+                </div>
+                <div class="flex justify-between">
+                    <dt class="text-gray-500">Membre depuis</dt>
+                    <dd class="text-gray-800 font-medium">{{ app.user.createdAt|date('d/m/Y') }}</dd>
+                </div>
+            </dl>
+        </div>
+
+        {# Compteur commandes #}
+        <div class="bg-amber-600 text-white rounded-2xl p-6 flex flex-col justify-center">
+            <span class="text-4xl font-bold">{{ orderCount }}</span>
+            <span class="text-amber-100 text-sm mt-1">commande{{ orderCount > 1 ? 's' : '' }} passée{{ orderCount > 1 ? 's' : '' }}</span>
+            <a href="{{ path('app_account_orders') }}" class="mt-4 text-sm font-medium underline hover:no-underline">
+                Voir tout l'historique
+            </a>
+        </div>
+    </div>
+
+    {# Dernières commandes #}
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="font-bold text-gray-900">Dernières commandes</h2>
+        {% if orderCount > 3 %}
+            <a href="{{ path('app_account_orders') }}" class="text-sm text-amber-600 hover:text-amber-700">Tout voir →</a>
+        {% endif %}
+    </div>
+
+    {% if orders is empty %}
+        <div class="bg-white rounded-2xl border border-gray-200 p-10 text-center">
+            <p class="text-gray-500 mb-4">Vous n'avez pas encore passé de commande.</p>
+            <a href="{{ path('app_shop_index') }}"
+               class="inline-block bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors">
+                Découvrir nos miels
+            </a>
+        </div>
+    {% else %}
+        <div class="space-y-3">
+            {% for order in orders %}
+                {{ include('account/_order_row.html.twig', { order: order }) }}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

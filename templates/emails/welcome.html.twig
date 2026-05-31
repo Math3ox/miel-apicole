@@ -1,0 +1,25 @@
+{% extends 'emails/_layout.html.twig' %}
+
+{% block content %}
+    <h1 style="margin:0 0 16px; font-size:20px; color:#111827;">Bienvenue {{ user.firstName }} !</h1>
+
+    <p style="margin:0 0 16px; font-size:14px; line-height:1.6; color:#374151;">
+        Votre compte a bien été créé. Vous pouvez dès à présent parcourir nos miels
+        artisanaux et passer commande en quelques clics.
+    </p>
+
+    <p style="margin:0 0 24px; font-size:14px; line-height:1.6; color:#374151;">
+        Merci de votre confiance, et belle dégustation !
+    </p>
+
+    <table role="presentation" cellpadding="0" cellspacing="0">
+        <tr>
+            <td style="background-color:#d97706; border-radius:10px;">
+                <a href="{{ url('app_shop_index') }}"
+                   style="display:inline-block; padding:12px 24px; font-size:14px; font-weight:bold; color:#ffffff; text-decoration:none;">
+                    Découvrir nos miels
+                </a>
+            </td>
+        </tr>
+    </table>
+{% endblock %}
