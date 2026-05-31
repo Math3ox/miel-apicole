@@ -94,6 +94,7 @@ class CheckoutController extends AbstractController
 
                 try {
                     $mailer->sendOrderConfirmation($order);
+                    $mailer->sendAdminOrderNotification($order);
                 } catch (\Throwable) {
                 }
 

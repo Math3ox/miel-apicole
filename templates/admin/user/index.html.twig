@@ -1,0 +1,72 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Utilisateurs{% endblock %}
+{% block page_title %}Utilisateurs{% endblock %}
+
+{% block admin_content %}
+<p class="text-sm text-gray-500 mb-6">{{ users|length }} utilisateur{{ users|length != 1 ? 's' }}</p>
+
+{% if users is empty %}
+    <div class="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
+        Aucun utilisateur.
+    </div>
+{% else %}
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">Nom</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">Email</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">Rôle</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">Statut</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">Inscrit le</th>
+                    <th class="px-4 py-3"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for user in users %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-3 font-medium text-gray-800">{{ user.firstName }} {{ user.lastName }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ user.email }}</td>
+                    <td class="px-4 py-3">
+                        {% if 'ROLE_ADMIN' in user.roles %}
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Admin</span>
+                        {% else %}
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">Client</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3">
+                        {% if user.isActive %}
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700">Actif</span>
+                        {% else %}
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700">Désactivé</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-3 text-gray-500 text-xs">{{ user.createdAt|date('d/m/Y') }}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-3 justify-end">
+                            <a href="{{ path('admin_user_edit', {id: user.id}) }}"
+                               class="text-xs font-medium text-amber-600 hover:text-amber-800 transition-colors">
+                                Éditer
+                            </a>
+                            {% if user != app.user %}
+                                <form method="POST" action="{{ path('admin_user_toggle', {id: user.id}) }}"
+                                      onsubmit="return confirm('{{ user.isActive ? 'Désactiver' : 'Réactiver' }} ce compte ?')">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('toggle_user_' ~ user.id) }}">
+                                    <button type="submit"
+                                            class="text-xs font-medium transition-colors {{ user.isActive ? 'text-red-500 hover:text-red-700' : 'text-green-600 hover:text-green-800' }}">
+                                        {{ user.isActive ? 'Désactiver' : 'Réactiver' }}
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span class="text-xs text-gray-300">Vous</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
+{% endblock %}

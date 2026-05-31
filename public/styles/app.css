@@ -1454,6 +1454,13 @@
       }
     }
   }
+  .hover\:text-green-800 {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-green-800);
+      }
+    }
+  }
   .hover\:text-red-500 {
     &:hover {
       @media (hover: hover) {

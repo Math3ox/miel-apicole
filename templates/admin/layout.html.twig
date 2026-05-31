@@ -39,8 +39,9 @@
                 </svg>
                 Commandes
             </a>
-            <a href="#"
-               class="flex items-center gap-2.5 px-5 py-2.5 hover:bg-amber-800 transition-colors text-amber-300">
+            <a href="{{ path('admin_user_index') }}"
+               class="flex items-center gap-2.5 px-5 py-2.5 hover:bg-amber-800 transition-colors
+               {% if app.request.attributes.get('_route') starts with 'admin_user' %}bg-amber-800 text-white{% endif %}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197"/>
                 </svg>

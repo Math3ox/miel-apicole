@@ -51,6 +51,33 @@ class MailerService
         $this->mailer->send($email);
     }
 
+    public function sendPasswordReset(User $user, string $token): void
+    {
+        $email = (new TemplatedEmail())
+            ->from(new Address(self::FROM_EMAIL, self::FROM_NAME))
+            ->to(new Address($user->getEmail(), trim($user->getFirstName() . ' ' . $user->getLastName())))
+            ->subject('Réinitialisation de votre mot de passe')
+            ->htmlTemplate('emails/reset_password.html.twig')
+            ->context([
+                'user'  => $user,
+                'token' => $token,
+            ]);
+
+        $this->mailer->send($email);
+    }
+
+    public function sendAdminOrderNotification(Order $order): void
+    {
+        $email = (new TemplatedEmail())
+            ->from(new Address(self::FROM_EMAIL, self::FROM_NAME))
+            ->to(self::ADMIN_EMAIL)
+            ->subject(sprintf('Nouvelle commande #%d', $order->getId()))
+            ->htmlTemplate('emails/admin_order_notification.html.twig')
+            ->context(['order' => $order]);
+
+        $this->mailer->send($email);
+    }
+
     public function sendContactMessage(string $name, string $fromEmail, string $subject, string $message): void
     {
         $email = (new TemplatedEmail())
