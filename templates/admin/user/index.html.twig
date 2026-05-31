@@ -7,11 +7,11 @@
 <p class="text-sm text-gray-500 mb-6">{{ users|length }} utilisateur{{ users|length != 1 ? 's' }}</p>
 
 {% if users is empty %}
-    <div class="bg-white rounded-xl border border-gray-200 p-12 text-center text-gray-400">
+    <div class="bg-white rounded-lg border border-gray-200 p-12 text-center text-gray-400">
         Aucun utilisateur.
     </div>
 {% else %}
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <table class="w-full text-sm">
             <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -25,7 +25,7 @@
             </thead>
             <tbody class="divide-y divide-gray-100">
                 {% for user in users %}
-                <tr class="hover:bg-gray-50 transition-colors">
+                <tr class="hover:bg-gray-50">
                     <td class="px-4 py-3 font-medium text-gray-800">{{ user.firstName }} {{ user.lastName }}</td>
                     <td class="px-4 py-3 text-gray-600">{{ user.email }}</td>
                     <td class="px-4 py-3">
@@ -46,7 +46,7 @@
                     <td class="px-4 py-3">
                         <div class="flex items-center gap-3 justify-end">
                             <a href="{{ path('admin_user_edit', {id: user.id}) }}"
-                               class="text-xs font-medium text-amber-600 hover:text-amber-800 transition-colors">
+                               class="text-xs font-medium text-amber-600 hover:text-amber-800">
                                 Éditer
                             </a>
                             {% if user != app.user %}
@@ -54,7 +54,7 @@
                                       onsubmit="return confirm('{{ user.isActive ? 'Désactiver' : 'Réactiver' }} ce compte ?')">
                                     <input type="hidden" name="_token" value="{{ csrf_token('toggle_user_' ~ user.id) }}">
                                     <button type="submit"
-                                            class="text-xs font-medium transition-colors {{ user.isActive ? 'text-red-500 hover:text-red-700' : 'text-green-600 hover:text-green-800' }}">
+                                            class="text-xs font-medium {{ user.isActive ? 'text-red-500 hover:text-red-700' : 'text-green-600 hover:text-green-800' }}">
                                         {{ user.isActive ? 'Désactiver' : 'Réactiver' }}
                                     </button>
                                 </form>

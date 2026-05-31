@@ -1,20 +1,20 @@
 {% set statusLabels = {
-    pending:   'En attente',
-    paid:      'Payée',
-    shipped:   'Expédiée',
+    pending: 'En attente',
+    paid: 'Payée',
+    shipped: 'Expédiée',
     delivered: 'Livrée',
     cancelled: 'Annulée'
 } %}
 {% set statusStyles = {
-    pending:   'bg-amber-100 text-amber-800',
-    paid:      'bg-blue-100 text-blue-800',
-    shipped:   'bg-indigo-100 text-indigo-800',
+    pending: 'bg-amber-100 text-amber-800',
+    paid: 'bg-blue-100 text-blue-800',
+    shipped: 'bg-indigo-100 text-indigo-800',
     delivered: 'bg-green-100 text-green-800',
     cancelled: 'bg-red-100 text-red-800'
 } %}
 
 <a href="{{ path('app_account_order_show', { id: order.id }) }}"
-   class="flex items-center justify-between bg-white rounded-2xl border border-gray-200 p-5 hover:border-amber-300 hover:shadow-sm transition">
+   class="flex items-center justify-between bg-white rounded-lg border border-gray-200 p-5 hover:border-amber-300">
     <div>
         <div class="flex items-center gap-3 mb-1">
             <span class="font-semibold text-gray-900">Commande #{{ order.id }}</span>

@@ -10,7 +10,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         <div class="lg:col-span-2">
-            <div class="bg-white rounded-2xl border border-gray-200 p-6">
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
                 <h2 class="font-bold text-gray-900 text-lg mb-6">Adresse de livraison</h2>
 
                 <form method="POST" action="{{ path('app_checkout_index') }}" novalidate>
@@ -84,7 +84,7 @@
                     </div>
 
                     <button type="submit"
-                            class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3.5 rounded-xl transition-colors shadow-sm text-sm">
+                            class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3.5 rounded-lg text-sm">
                         Confirmer la commande — {{ total|number_format(2, ',', ' ') }} €
                     </button>
                 </form>
@@ -92,7 +92,7 @@
         </div>
 
         <div class="lg:col-span-1">
-            <div class="bg-white rounded-2xl border border-gray-200 p-6 sticky top-24">
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
                 <h2 class="font-bold text-gray-900 text-base mb-4">Votre commande</h2>
 
                 <div class="space-y-3 text-sm">
@@ -121,7 +121,7 @@
                     </div>
                 </div>
 
-                <a href="{{ path('app_cart_index') }}" class="block text-center text-xs text-gray-400 hover:text-amber-600 mt-3 transition-colors">
+                <a href="{{ path('app_cart_index') }}" class="block text-center text-xs text-gray-400 hover:text-amber-600 mt-3">
                     Modifier le panier
                 </a>
             </div>

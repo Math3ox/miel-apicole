@@ -1,11 +1,11 @@
 <a href="{{ path('app_shop_show', {slug: product.slug}) }}"
-   class="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col">
+   class="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col">
 
     <div class="relative aspect-square bg-amber-50 overflow-hidden">
         {% if product.image %}
             <img src="/uploads/products/{{ product.image }}"
                  alt="{{ product.name }}"
-                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                 class="w-full h-full object-cover">
         {% else %}
             <div class="w-full h-full flex items-center justify-center text-amber-300">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
@@ -16,12 +16,12 @@
 
         <div class="absolute top-3 left-3 flex flex-col gap-1.5">
             {% if product.isBestSeller %}
-                <span class="bg-amber-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
+                <span class="bg-amber-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
                     Best-seller
                 </span>
             {% endif %}
             {% if product.isOnSale %}
-                <span class="bg-green-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
+                <span class="bg-green-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
                     Promo
                 </span>
             {% endif %}
@@ -35,7 +35,7 @@
             </span>
         {% endif %}
 
-        <h2 class="font-semibold text-gray-800 text-base leading-snug mb-2 group-hover:text-amber-700 transition-colors">
+        <h2 class="font-semibold text-gray-800 text-base leading-snug mb-2">
             {{ product.name }}
         </h2>
 
@@ -58,7 +58,7 @@
                     {{ minPrice|number_format(2, ',', ' ') }} €
                 </div>
             </div>
-            <span class="text-xs font-medium text-amber-600 group-hover:text-amber-700 flex items-center gap-1">
+            <span class="text-xs font-medium text-amber-600 flex items-center gap-1">
                 Voir
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>

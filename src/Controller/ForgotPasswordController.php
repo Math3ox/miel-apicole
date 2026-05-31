@@ -25,6 +25,7 @@ class ForgotPasswordController extends AbstractController
             $user = $email !== '' ? $userRepo->findOneBy(['email' => $email]) : null;
 
             if ($user && $user->isActive()) {
+                // on genere un token aleatoire, on stocke sa version hashée et on envoie le lien par mail
                 $token = bin2hex(random_bytes(32));
                 $user->setResetToken(hash('sha256', $token));
                 $user->setResetTokenExpiresAt(new \DateTimeImmutable('+1 hour'));

@@ -9,6 +9,7 @@ services:
       - ./:/var/www/html:z
     environment:
       APP_ENV: ${APP_ENV:-dev}
+      MAILER_DSN: "smtp://mailpit:1025"
       # DATABASE_URL: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}?serverVersion=8.0&charset=utf8mb4"
     depends_on:
       mysql:
@@ -61,6 +62,15 @@ services:
       - "8081:80"
     depends_on:
       - mysql
+    networks:
+      - apiculteur
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: apiculteur_mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
     networks:
       - apiculteur
 

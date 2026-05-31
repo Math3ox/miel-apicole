@@ -17,7 +17,7 @@
         </p>
     </div>
 
-    <div class="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+    <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
         <h2 class="font-bold text-gray-900 mb-4">Récapitulatif</h2>
 
         <div class="space-y-3 mb-5">
@@ -40,7 +40,7 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
+    <div class="bg-white rounded-lg border border-gray-200 p-6 mb-8">
         <h2 class="font-bold text-gray-900 mb-3">Livraison à</h2>
         <address class="text-sm text-gray-600 not-italic leading-relaxed">
             {{ order.deliveryFirstName }} {{ order.deliveryLastName }}<br>
@@ -52,15 +52,15 @@
 
     <div class="flex flex-col sm:flex-row gap-3 justify-center">
         <a href="{{ path('app_account_invoice', { id: order.id }) }}"
-           class="inline-block text-center bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-3 rounded-xl transition-colors">
+           class="inline-block text-center bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-3 rounded-lg">
             Télécharger la facture
         </a>
         <a href="{{ path('app_account_orders') }}"
-           class="inline-block text-center bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold px-6 py-3 rounded-xl transition-colors">
+           class="inline-block text-center bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold px-6 py-3 rounded-lg">
             Mes commandes
         </a>
         <a href="{{ path('app_shop_index') }}"
-           class="inline-block text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-6 py-3 rounded-xl transition-colors">
+           class="inline-block text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-6 py-3 rounded-lg">
             Continuer mes achats
         </a>
     </div>

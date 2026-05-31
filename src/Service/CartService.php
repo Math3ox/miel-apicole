@@ -15,6 +15,7 @@ class CartService
     public function add(int $variantId, int $quantity = 1): void
     {
         $cart = $this->getRawCart();
+        // si le produit est deja dans le panier on ajoute la quantité, sinon on part de 0
         $cart[$variantId] = ($cart[$variantId] ?? 0) + $quantity;
         $this->save($cart);
     }

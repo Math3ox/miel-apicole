@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <defs>
+        <clipPath id="beeBody">
+            <ellipse cx="50" cy="60" rx="20" ry="28"/>
+        </clipPath>
+    </defs>
+
+    <ellipse cx="28" cy="44" rx="15" ry="10" fill="#ffffff" stroke="#000000" stroke-width="3" transform="rotate(-28 28 44)"/>
+    <ellipse cx="72" cy="44" rx="15" ry="10" fill="#ffffff" stroke="#000000" stroke-width="3" transform="rotate(28 72 44)"/>
+
+    <path d="M45 14 Q40 5 33 5" fill="none" stroke="#000000" stroke-width="3" stroke-linecap="round"/>
+    <path d="M55 14 Q60 5 67 5" fill="none" stroke="#000000" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="33" cy="5" r="3" fill="#000000"/>
+    <circle cx="67" cy="5" r="3" fill="#000000"/>
+
+    <circle cx="50" cy="24" r="11" fill="#000000"/>
+
+    <g clip-path="url(#beeBody)">
+        <rect x="28" y="30" width="44" height="60" fill="#ffffff"/>
+        <rect x="28" y="40" width="44" height="9" fill="#000000"/>
+        <rect x="28" y="58" width="44" height="9" fill="#000000"/>
+        <rect x="28" y="76" width="44" height="9" fill="#000000"/>
+    </g>
+    <ellipse cx="50" cy="60" rx="20" ry="28" fill="none" stroke="#000000" stroke-width="3"/>
+</svg>

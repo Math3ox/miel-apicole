@@ -58,6 +58,7 @@ class CheckoutController extends AbstractController
             }
 
             if (empty($errors)) {
+                // on cree la commande a partir du panier
                 $order = new Order();
                 $order->setUser($this->getUser());
                 $order->setStatus('pending');
