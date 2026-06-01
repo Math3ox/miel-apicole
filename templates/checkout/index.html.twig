@@ -41,7 +41,6 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1.5" for="street">Adresse</label>
                         <input type="text" id="street" name="street"
                                value="{{ data.street }}"
-                               placeholder="12 rue des Fleurs"
                                class="w-full border rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-300 {{ errors.street is defined ? 'border-red-400 bg-red-50' : 'border-gray-200' }}">
                         {% if errors.street is defined %}
                             <p class="text-red-500 text-xs mt-1">{{ errors.street }}</p>
@@ -53,7 +52,6 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1.5" for="postalCode">Code postal</label>
                             <input type="text" id="postalCode" name="postalCode"
                                    value="{{ data.postalCode }}"
-                                   placeholder="75001"
                                    class="w-full border rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-300 {{ errors.postalCode is defined ? 'border-red-400 bg-red-50' : 'border-gray-200' }}">
                             {% if errors.postalCode is defined %}
                                 <p class="text-red-500 text-xs mt-1">{{ errors.postalCode }}</p>
@@ -64,7 +62,6 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1.5" for="city">Ville</label>
                             <input type="text" id="city" name="city"
                                    value="{{ data.city }}"
-                                   placeholder="Paris"
                                    class="w-full border rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-300 {{ errors.city is defined ? 'border-red-400 bg-red-50' : 'border-gray-200' }}">
                             {% if errors.city is defined %}
                                 <p class="text-red-500 text-xs mt-1">{{ errors.city }}</p>
