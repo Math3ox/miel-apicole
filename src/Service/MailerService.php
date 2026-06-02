@@ -10,9 +10,9 @@ use Symfony\Component\Mime\Address;
 
 class MailerService
 {
-    private const FROM_EMAIL  = 'contact@miel-apicole.fr';
-    private const FROM_NAME   = 'Miel Apicole';
-    private const ADMIN_EMAIL = 'contact@miel-apicole.fr';
+    private const FROM_EMAIL  = 'contact@rucher-du-loison.fr';
+    private const FROM_NAME   = 'Rucher du Loison';
+    private const ADMIN_EMAIL = 'contact@rucher-du-loison.fr';
 
     public function __construct(
         private readonly MailerInterface $mailer,
@@ -24,7 +24,7 @@ class MailerService
         $email = (new TemplatedEmail())
             ->from(new Address(self::FROM_EMAIL, self::FROM_NAME))
             ->to(new Address($user->getEmail(), trim($user->getFirstName() . ' ' . $user->getLastName())))
-            ->subject('Bienvenue chez Miel Apicole 🍯')
+            ->subject('Bienvenue chez Rucher du Loison')
             ->htmlTemplate('emails/welcome.html.twig')
             ->context(['user' => $user]);
 
