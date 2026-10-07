@@ -43,6 +43,7 @@ Le rôle se change dans Admin › Utilisateurs. Premier admin, en SQL :
 ## À savoir
 
 - Panier en session (`CartService`), plafonné au stock.
+- Commande possible sans compte (invité) : email demandé, stocké dans `order.guest_email` (`user` vide). Confirmation et facture accessibles seulement depuis la session qui a commandé, et envoyées par mail.
 - **Stock** : toujours modifié via `StockManager`, qui verrouille la variante et écrit une ligne dans `stock_movement`
   (vente, annulation, réassort, perte, inventaire, stock de départ). Admin › Stock : réassort / perte / inventaire,
   filtres « bas » (≤ 5, `ProductVariant::LOW_STOCK_THRESHOLD`) et « rupture », historique. La fiche produit ne modifie

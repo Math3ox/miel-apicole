@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Service\CartService;
+use App\Service\InvoiceGenerator;
 use App\Service\MailerService;
 use App\Service\StockManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -14,10 +15,22 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[IsGranted('ROLE_USER')]
+// commande ouverte à tous : avec un compte, ou en invité (on demande alors juste un email)
 #[Route('/commande', name: 'app_checkout_')]
 class CheckoutController extends AbstractController
 {
+    // ids des commandes passées en invité dans cette session (pour leur page de confirmation)
+    private const GUEST_ORDERS_KEY = 'guest_orders';
+
+    // lien « Se connecter » de la page commande : la sécurité envoie vers la connexion
+    // puis revient ici, et on renvoie sur la commande
+    #[IsGranted('ROLE_USER')]
+    #[Route('/connexion', name: 'login', methods: ['GET'])]
+    public function login(): Response
+    {
+        return $this->redirectToRoute('app_checkout_index');
+    }
+
     #[Route('', name: 'index', methods: ['GET', 'POST'])]
     public function index(
         Request $request,
@@ -34,9 +47,11 @@ class CheckoutController extends AbstractController
         }
 
         $errors = [];
+        $user = $this->getUser();
         $data = [
-            'firstName'  => $this->getUser()->getFirstName(),
-            'lastName'   => $this->getUser()->getLastName(),
+            'email'      => '',
+            'firstName'  => $user?->getFirstName() ?? '',
+            'lastName'   => $user?->getLastName() ?? '',
             'street'     => '',
             'city'       => '',
             'postalCode' => '',
@@ -45,6 +60,7 @@ class CheckoutController extends AbstractController
 
         if ($request->isMethod('POST')) {
             $data = [
+                'email'      => trim($request->request->get('email', '')),
                 'firstName'  => trim($request->request->get('firstName', '')),
                 'lastName'   => trim($request->request->get('lastName', '')),
                 'street'     => trim($request->request->get('street', '')),
@@ -56,6 +72,10 @@ class CheckoutController extends AbstractController
             if (!$this->isCsrfTokenValid('checkout', $request->request->get('_token'))) {
                 $this->addFlash('error', 'Token de sécurité invalide, veuillez réessayer.');
                 return $this->redirectToRoute('app_checkout_index');
+            }
+
+            if (!$user && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+                $errors['email'] = 'Adresse email invalide : elle sert à vous envoyer la confirmation et la facture.';
             }
 
             foreach (['firstName', 'lastName', 'street', 'city', 'postalCode', 'country'] as $field) {
@@ -77,6 +97,11 @@ class CheckoutController extends AbstractController
                 }
 
                 $cart->clear();
+
+                if ($order->isGuest()) {
+                    $session = $request->getSession();
+                    $session->set(self::GUEST_ORDERS_KEY, [...$session->get(self::GUEST_ORDERS_KEY, []), $order->getId()]);
+                }
 
                 try {
                     $mailer->sendOrderConfirmation($order);
@@ -110,6 +135,7 @@ class CheckoutController extends AbstractController
 
         $order = new Order();
         $order->setUser($this->getUser());
+        $order->setGuestEmail($this->getUser() ? null : $data['email']);
         $order->setStatus('pending');
         $order->setCreatedAt(new \DateTimeImmutable());
         $order->setDeliveryFirstName($data['firstName']);
@@ -143,14 +169,39 @@ class CheckoutController extends AbstractController
     }
 
     #[Route('/confirmation/{id}', name: 'confirm', methods: ['GET'])]
-    public function confirm(Order $order): Response
+    public function confirm(Order $order, Request $request): Response
     {
-        if ($order->getUser() !== $this->getUser()) {
-            throw $this->createAccessDeniedException();
-        }
+        $this->denyUnlessCanView($order, $request);
 
         return $this->render('checkout/confirm.html.twig', [
             'order' => $order,
         ]);
+    }
+
+    #[Route('/confirmation/{id}/facture', name: 'invoice', methods: ['GET'])]
+    public function invoice(Order $order, Request $request, InvoiceGenerator $invoices): Response
+    {
+        $this->denyUnlessCanView($order, $request);
+
+        return new Response(
+            $invoices->generate($order),
+            Response::HTTP_OK,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => sprintf('attachment; filename="%s"', $invoices->filename($order)),
+            ],
+        );
+    }
+
+    // client connecté : sa propre commande ; invité : une commande passée dans cette session
+    private function denyUnlessCanView(Order $order, Request $request): void
+    {
+        $allowed = $order->isGuest()
+            ? in_array($order->getId(), $request->getSession()->get(self::GUEST_ORDERS_KEY, []), true)
+            : $order->getUser() === $this->getUser();
+
+        if (!$allowed) {
+            throw $this->createAccessDeniedException();
+        }
     }
 }

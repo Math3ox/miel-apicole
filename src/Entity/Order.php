@@ -47,9 +47,13 @@ class Order
     #[ORM\Column(length: 255)]
     private ?string $deliveryCountry = null;
 
+    // null pour une commande passée en invité : on garde alors son email
     #[ORM\ManyToOne(inversedBy: 'orders')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?User $user = null;
+
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $guestEmail = null;
 
     #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'orderRef', orphanRemoval: true)]
     private Collection $orderItems;
@@ -140,6 +144,41 @@ class Order
         $this->user = $user;
 
         return $this;
+    }
+
+    public function getGuestEmail(): ?string
+    {
+        return $this->guestEmail;
+    }
+
+    public function setGuestEmail(?string $guestEmail): static
+    {
+        $this->guestEmail = $guestEmail;
+
+        return $this;
+    }
+
+    public function isGuest(): bool
+    {
+        return $this->user === null;
+    }
+
+    // email et nom du client, qu'il ait un compte ou non
+    public function getCustomerEmail(): ?string
+    {
+        return $this->user?->getEmail() ?? $this->guestEmail;
+    }
+
+    public function getCustomerFirstName(): ?string
+    {
+        return $this->user?->getFirstName() ?? $this->deliveryFirstName;
+    }
+
+    public function getCustomerName(): string
+    {
+        return $this->user
+            ? trim($this->user->getFirstName() . ' ' . $this->user->getLastName())
+            : trim($this->deliveryFirstName . ' ' . $this->deliveryLastName);
     }
 
     public function getOrderItems(): Collection

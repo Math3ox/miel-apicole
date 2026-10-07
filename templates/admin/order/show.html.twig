@@ -67,11 +67,11 @@
             <dl class="space-y-2.5 text-sm">
                 <div class="flex justify-between">
                     <dt class="text-gray-500">Client</dt>
-                    <dd class="text-gray-800 font-medium">{{ order.user.firstName }} {{ order.user.lastName }}</dd>
+                    <dd class="text-gray-800 font-medium">{{ order.customerName }}{% if order.guest %} <span class="ml-1 text-xs font-normal px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">Invité, sans compte</span>{% endif %}</dd>
                 </div>
                 <div class="flex justify-between">
                     <dt class="text-gray-500">Email</dt>
-                    <dd class="text-gray-800">{{ order.user.email }}</dd>
+                    <dd class="text-gray-800">{{ order.customerEmail }}</dd>
                 </div>
                 <div class="flex justify-between">
                     <dt class="text-gray-500">Passée le</dt>

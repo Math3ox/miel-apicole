@@ -33,11 +33,9 @@ class MailerService
 
     public function sendOrderConfirmation(Order $order): void
     {
-        $user = $order->getUser();
-
         $email = (new TemplatedEmail())
             ->from(new Address(self::FROM_EMAIL, self::FROM_NAME))
-            ->to(new Address($user->getEmail(), trim($user->getFirstName() . ' ' . $user->getLastName())))
+            ->to(new Address($order->getCustomerEmail(), $order->getCustomerName()))
             ->subject(sprintf('Confirmation de votre commande #%d', $order->getId()))
             ->htmlTemplate('emails/order_confirmation.html.twig')
             ->context(['order' => $order]);

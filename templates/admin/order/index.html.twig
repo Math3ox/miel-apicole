@@ -51,7 +51,7 @@
                     <td class="px-4 py-3 font-medium text-gray-800">#{{ order.id }}</td>
                     <td class="px-4 py-3 text-gray-700">
                         {{ order.deliveryFirstName }} {{ order.deliveryLastName }}
-                        <div class="text-xs text-gray-400">{{ order.user.email }}</div>
+                        <div class="text-xs text-gray-400">{{ order.customerEmail }}{% if order.guest %} <span class="ml-1 px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">Invité</span>{% endif %}</div>
                     </td>
                     <td class="px-4 py-3 text-gray-500 text-xs">{{ order.createdAt|date('d/m/Y H:i') }}</td>
                     <td class="px-4 py-3 text-gray-600">{{ order.orderItems|length }}</td>
