@@ -22,7 +22,7 @@ Tailwind en mode watch :
 
 Tests : `docker exec apiculteur_php php bin/phpunit`
 
-Sous Windows, le site est lent (10-20 s par page) car le dossier est monté depuis le disque Windows.
+`vendor/` et `var/` vivent dans des volumes Docker (sinon 10 s+ par page sous Windows) : lancer `composer install` dans le conteneur, pas sur Windows.
 
 ## Config
 

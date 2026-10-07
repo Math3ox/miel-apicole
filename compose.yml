@@ -7,6 +7,10 @@ services:
     userns_mode: keep-id
     volumes:
       - ./:/var/www/html:z
+      # vendor/ et var/ restent côté Linux : sous Windows, lire ces milliers
+      # de fichiers à travers le dossier partagé rend chaque page très lente
+      - vendor:/var/www/html/vendor
+      - var:/var/www/html/var
     environment:
       APP_ENV: ${APP_ENV:-dev}
       MAILER_DSN: "smtp://mailpit:1025"
@@ -76,6 +80,8 @@ services:
 
 volumes:
   mysql_data:
+  vendor:
+  var:
 
 networks:
   apiculteur:

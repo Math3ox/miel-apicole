@@ -39,7 +39,9 @@ WORKDIR /var/www/html
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
 
 # Créer un user non-root pour éviter les problèmes de permissions
+# (vendor/ et var/ sont créés ici pour que leurs volumes appartiennent à symfony)
 RUN adduser -D -u 1000 symfony \
+    && mkdir -p /var/www/html/vendor /var/www/html/var \
     && chown -R symfony:symfony /var/www/html
 
 USER symfony
