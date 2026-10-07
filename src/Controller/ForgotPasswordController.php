@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Service\MailerService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -10,14 +11,23 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use SymfonyCasts\Bundle\ResetPassword\Controller\ResetPasswordControllerTrait;
+use SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface;
+use SymfonyCasts\Bundle\ResetPassword\ResetPasswordHelperInterface;
 
+// mot de passe oublié via symfonycasts/reset-password-bundle (génération, stockage et expiration des liens)
 class ForgotPasswordController extends AbstractController
 {
+    use ResetPasswordControllerTrait;
+
+    public function __construct(
+        private readonly ResetPasswordHelperInterface $resetPasswordHelper,
+    ) {}
+
     #[Route('/mot-de-passe-oublie', name: 'app_forgot_password', methods: ['GET', 'POST'])]
     public function request(
         Request $request,
         UserRepository $userRepo,
-        EntityManagerInterface $em,
         MailerService $mailer,
     ): Response {
         if ($request->isMethod('POST')) {
@@ -30,14 +40,11 @@ class ForgotPasswordController extends AbstractController
             $user = $email !== '' ? $userRepo->findOneBy(['email' => $email]) : null;
 
             if ($user && $user->isActive()) {
-                // on genere un token aleatoire, on stocke sa version hashée et on envoie le lien par mail
-                $token = bin2hex(random_bytes(32));
-                $user->setResetToken(hash('sha256', $token));
-                $user->setResetTokenExpiresAt(new \DateTimeImmutable('+1 hour'));
-                $em->flush();
-
                 try {
-                    $mailer->sendPasswordReset($user, $token);
+                    $resetToken = $this->resetPasswordHelper->generateResetToken($user);
+                    $mailer->sendPasswordReset($user, $resetToken->getToken());
+                } catch (ResetPasswordExceptionInterface) {
+                    // demande trop rapprochée : on ne dit rien, pour ne pas révéler si le compte existe
                 } catch (\Throwable) {
                 }
             }
@@ -51,15 +58,28 @@ class ForgotPasswordController extends AbstractController
 
     #[Route('/reinitialiser-mot-de-passe/{token}', name: 'app_reset_password', methods: ['GET', 'POST'])]
     public function reset(
-        string $token,
         Request $request,
-        UserRepository $userRepo,
         EntityManagerInterface $em,
         UserPasswordHasherInterface $hasher,
+        ?string $token = null,
     ): Response {
-        $user = $userRepo->findOneBy(['resetToken' => hash('sha256', $token)]);
+        // le token du mail est mis en session puis retiré de l'URL,
+        // pour qu'il ne fuite pas (historique, en-tête Referer...)
+        if ($token) {
+            $this->storeTokenInSession($token);
+            return $this->redirectToRoute('app_reset_password');
+        }
 
-        if (!$user || $user->getResetTokenExpiresAt() === null || $user->getResetTokenExpiresAt() < new \DateTimeImmutable()) {
+        $token = $this->getTokenFromSession();
+
+        try {
+            /** @var User $user */
+            $user = $token ? $this->resetPasswordHelper->validateTokenAndFetchUser($token) : null;
+        } catch (ResetPasswordExceptionInterface) {
+            $user = null;
+        }
+
+        if (!$user) {
             $this->addFlash('error', 'Ce lien de réinitialisation est invalide ou a expiré.');
             return $this->redirectToRoute('app_forgot_password');
         }
@@ -81,10 +101,13 @@ class ForgotPasswordController extends AbstractController
             }
 
             if (empty($errors)) {
+                // le lien ne sert qu'une fois
+                $this->resetPasswordHelper->removeResetRequest($token);
+
                 $user->setPassword($hasher->hashPassword($user, $password));
-                $user->setResetToken(null);
-                $user->setResetTokenExpiresAt(null);
                 $em->flush();
+
+                $this->cleanSessionAfterReset();
 
                 $this->addFlash('success', 'Votre mot de passe a été réinitialisé. Vous pouvez vous connecter.');
                 return $this->redirectToRoute('app_login');
@@ -92,7 +115,6 @@ class ForgotPasswordController extends AbstractController
         }
 
         return $this->render('security/reset_password.html.twig', [
-            'token'  => $token,
             'errors' => $errors,
         ]);
     }

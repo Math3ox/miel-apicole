@@ -44,5 +44,6 @@ Le rôle se change dans Admin › Utilisateurs. Premier admin, en SQL :
 
 - Panier en session (`CartService`), plafonné au stock. Le stock est verrouillé pendant la commande.
 - Un produit ou une variante déjà commandé ne peut pas être supprimé : passer son stock à 0.
+- Mot de passe oublié : `symfonycasts/reset-password-bundle` (lien valable 1 h, une demande max toutes les 15 min). Config dans `config/packages/reset_password.yaml`.
 - Factures PDF via Dompdf (`InvoiceGenerator`). Mails via Symfony Mailer (`MailerService`) et des templates dans `templates/emails/`.
 - Notes de conception d'origine : `fichier.md`.
