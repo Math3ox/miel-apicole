@@ -1,0 +1,8 @@
+{# badge de stock d'une variante : rouge si rupture, orange si bas (<= 5), vert sinon #}
+{% if variant.outOfStock %}
+    <span class="inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">Rupture</span>
+{% elseif variant.lowStock %}
+    <span class="inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">{{ variant.stock }} · bas</span>
+{% else %}
+    <span class="inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700">{{ variant.stock }}</span>
+{% endif %}

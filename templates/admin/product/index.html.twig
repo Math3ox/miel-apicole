@@ -66,6 +66,14 @@
                             {{ variantCount > 0 ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-500' }}">
                             {{ variantCount }} variante{{ variantCount != 1 ? 's' }}
                         </span>
+                        {% if variantCount > 0 %}
+                            <div class="mt-1 flex flex-wrap gap-1">
+                                {% for variant in product.productVariants %}
+                                    <span class="text-xs text-gray-500">{{ variant.weight }} g</span>
+                                    {{ include('admin/_stock_badge.html.twig', { variant: variant }) }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </td>
                     <td class="px-4 py-3">
                         <div class="flex flex-wrap gap-1">

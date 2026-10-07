@@ -8,6 +8,7 @@ use App\Entity\ProductVariant;
 use App\Repository\CategoryRepository;
 use App\Repository\OrderItemRepository;
 use App\Repository\ProductRepository;
+use App\Service\StockManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,6 +19,10 @@ use Symfony\Component\String\Slugger\AsciiSlugger;
 #[Route('/admin/produits', name: 'admin_product_')]
 class ProductController extends AbstractController
 {
+    public function __construct(
+        private readonly StockManager $stock,
+    ) {}
+
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(ProductRepository $productRepo): Response
     {
@@ -250,23 +255,28 @@ class ProductController extends AbstractController
             $p = $prices[$i] ?? null;
             $s = $stocks[$i] ?? null;
 
-            if ($w > 0 && is_numeric($p) && is_numeric($s)) {
+            if ($w > 0 && is_numeric($p) && is_numeric($s) && (int) $s >= 0) {
                 $variant = new ProductVariant();
                 $variant->setWeight($w);
                 $variant->setPrice((string) (float) $p);
-                $variant->setStock((int) $s);
+                $variant->setStock(0);
                 $product->addProductVariant($variant);
                 $em->persist($variant);
+
+                if ((int) $s > 0) {
+                    $this->stock->move($variant, (int) $s, 'initial', $this->getUser());
+                }
             }
         }
     }
 
+    // le stock des variantes existantes ne se modifie pas ici mais depuis la page Stock :
+    // sinon enregistrer la fiche écraserait les ventes passées pendant qu'elle était ouverte
     private function syncExistingVariants(Product $product, Request $request, EntityManagerInterface $em): void
     {
         $allPost         = $request->request->all();
         $existingWeights = $allPost['existing_weight'] ?? [];
         $existingPrices  = $allPost['existing_price']  ?? [];
-        $existingStocks  = $allPost['existing_stock']  ?? [];
 
         foreach ($product->getProductVariants() as $variant) {
             $vid = (string) $variant->getId();
@@ -277,12 +287,10 @@ class ProductController extends AbstractController
 
             $w = (int) $existingWeights[$vid];
             $p = $existingPrices[$vid] ?? null;
-            $s = $existingStocks[$vid] ?? null;
 
-            if ($w > 0 && is_numeric($p) && is_numeric($s)) {
+            if ($w > 0 && is_numeric($p)) {
                 $variant->setWeight($w);
                 $variant->setPrice((string) (float) $p);
-                $variant->setStock((int) $s);
             }
         }
     }

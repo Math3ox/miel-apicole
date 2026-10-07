@@ -6,7 +6,7 @@ use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Service\CartService;
 use App\Service\MailerService;
-use Doctrine\DBAL\LockMode;
+use App\Service\StockManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,6 +24,7 @@ class CheckoutController extends AbstractController
         CartService $cart,
         EntityManagerInterface $em,
         MailerService $mailer,
+        StockManager $stock,
     ): Response {
         $items = $cart->getFullCart();
 
@@ -64,7 +65,7 @@ class CheckoutController extends AbstractController
             }
 
             if (empty($errors)) {
-                $order = $em->wrapInTransaction(fn () => $this->createOrder($items, $data, $em));
+                $order = $em->wrapInTransaction(fn () => $this->createOrder($items, $data, $em, $stock));
 
                 if ($order === null) {
                     // le stock a bougé depuis l'ajout au panier : on ajuste le panier et on prévient le client
@@ -96,12 +97,12 @@ class CheckoutController extends AbstractController
     }
 
     // cree la commande a partir du panier, ou renvoie null si un produit n'a plus assez de stock
-    private function createOrder(array $items, array $data, EntityManagerInterface $em): ?Order
+    private function createOrder(array $items, array $data, EntityManagerInterface $em, StockManager $stock): ?Order
     {
-        // on verrouille les variantes (SELECT ... FOR UPDATE) pour que deux commandes
-        // simultanées ne puissent pas vendre le meme dernier pot
+        // on verrouille les variantes pour que deux commandes simultanées
+        // ne puissent pas vendre le meme dernier pot
         foreach ($items as $item) {
-            $em->refresh($item['variant'], LockMode::PESSIMISTIC_WRITE);
+            $stock->lock($item['variant']);
             if ($item['variant']->getStock() < $item['quantity']) {
                 return null;
             }
@@ -132,7 +133,7 @@ class CheckoutController extends AbstractController
 
             $total += (float) $variant->getPrice() * $item['quantity'];
 
-            $variant->setStock($variant->getStock() - $item['quantity']);
+            $stock->move($variant, -$item['quantity'], 'sale', $this->getUser(), $order);
         }
 
         $order->setTotalPrice(number_format($total, 2, '.', ''));

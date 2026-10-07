@@ -30,7 +30,12 @@ class ProductRepository extends ServiceEntityRepository
             default      => $qb->orderBy('p.createdAt', 'DESC'),
         };
 
-        return $qb->getQuery()->getResult();
+        $products = $qb->getQuery()->getResult();
+
+        // les produits en rupture passent en dernier (usort est stable : l'ordre choisi est gardé)
+        usort($products, fn (Product $a, Product $b) => $a->isOutOfStock() <=> $b->isOutOfStock());
+
+        return $products;
     }
 
     public function findBySlugWithRelations(string $slug): ?Product

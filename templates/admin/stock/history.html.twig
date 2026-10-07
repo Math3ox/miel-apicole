@@ -1,0 +1,73 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Historique du stock{% endblock %}
+{% block page_title %}Historique du stock{% if variant %} · {{ variant.product.name }} {{ variant.weight }} g{% endif %}{% endblock %}
+
+{% block admin_content %}
+<div class="flex items-center justify-between mb-6">
+    <p class="text-sm text-gray-500">
+        {{ movements|length }} dernier{{ movements|length != 1 ? 's' }} mouvement{{ movements|length != 1 ? 's' }}
+        {% if variant %}· <a href="{{ path('admin_stock_history') }}" class="text-amber-700 hover:underline">voir tous les produits</a>{% endif %}
+    </p>
+    <a href="{{ path('admin_stock_index') }}" class="text-sm font-medium text-amber-700 hover:underline">← Retour au stock</a>
+</div>
+
+{% set typeColors = {
+    initial: 'bg-gray-100 text-gray-700',
+    sale: 'bg-blue-50 text-blue-700',
+    cancel: 'bg-purple-50 text-purple-700',
+    restock: 'bg-green-50 text-green-700',
+    loss: 'bg-red-50 text-red-700',
+    inventory: 'bg-amber-50 text-amber-800'
+} %}
+
+{% if movements is empty %}
+    <div class="bg-white rounded-lg border border-gray-200 p-12 text-center text-gray-400">
+        Aucun mouvement enregistré pour l'instant.
+    </div>
+{% else %}
+    <div class="bg-white rounded-lg border border-gray-200 overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">Date</th>
+                    {% if not variant %}<th class="text-left px-4 py-3 font-medium text-gray-600">Produit</th>{% endif %}
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">Type</th>
+                    <th class="text-right px-4 py-3 font-medium text-gray-600">Pots</th>
+                    <th class="text-right px-4 py-3 font-medium text-gray-600">Stock après</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">Par</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">Détail</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for m in movements %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{{ m.createdAt|date('d/m/Y H:i') }}</td>
+                    {% if not variant %}
+                        <td class="px-4 py-3 text-gray-800">
+                            <a href="{{ path('admin_stock_history', { variante: m.variant.id }) }}" class="hover:text-amber-700">
+                                {{ m.variant.product.name }} <span class="text-gray-500">{{ m.variant.weight }} g</span>
+                            </a>
+                        </td>
+                    {% endif %}
+                    <td class="px-4 py-3">
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full {{ typeColors[m.type]|default('bg-gray-100 text-gray-700') }}">{{ m.typeLabel }}</span>
+                    </td>
+                    <td class="px-4 py-3 text-right font-semibold {{ m.quantity < 0 ? 'text-red-600' : 'text-green-700' }}">
+                        {{ m.quantity > 0 ? '+' }}{{ m.quantity }}
+                    </td>
+                    <td class="px-4 py-3 text-right text-gray-700">{{ m.stockAfter }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ m.user ? m.user.firstName ~ ' ' ~ m.user.lastName : '—' }}</td>
+                    <td class="px-4 py-3 text-gray-600">
+                        {% if m.order %}
+                            <a href="{{ path('admin_order_show', { id: m.order.id }) }}" class="text-amber-700 hover:underline">Commande #{{ m.order.id }}</a>
+                        {% endif %}
+                        {{ m.comment }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
+{% endblock %}

@@ -42,7 +42,11 @@ Le rôle se change dans Admin › Utilisateurs. Premier admin, en SQL :
 
 ## À savoir
 
-- Panier en session (`CartService`), plafonné au stock. Le stock est verrouillé pendant la commande.
+- Panier en session (`CartService`), plafonné au stock.
+- **Stock** : toujours modifié via `StockManager`, qui verrouille la variante et écrit une ligne dans `stock_movement`
+  (vente, annulation, réassort, perte, inventaire, stock de départ). Admin › Stock : réassort / perte / inventaire,
+  filtres « bas » (≤ 5, `ProductVariant::LOW_STOCK_THRESHOLD`) et « rupture », historique. La fiche produit ne modifie
+  plus le stock des variantes existantes. Annuler une commande remet ses pots en stock.
 - Un produit ou une variante déjà commandé ne peut pas être supprimé : passer son stock à 0.
 - Mot de passe oublié : `symfonycasts/reset-password-bundle` (lien valable 1 h, une demande max toutes les 15 min). Config dans `config/packages/reset_password.yaml`.
 - Factures PDF via Dompdf (`InvoiceGenerator`). Mails via Symfony Mailer (`MailerService`) et des templates dans `templates/emails/`.

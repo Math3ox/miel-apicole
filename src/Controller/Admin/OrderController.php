@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\Order;
 use App\Repository\OrderRepository;
 use App\Service\InvoiceGenerator;
+use App\Service\StockManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -49,6 +50,7 @@ class OrderController extends AbstractController
         Order $order,
         Request $request,
         EntityManagerInterface $em,
+        StockManager $stock,
     ): Response {
         if (!$this->isCsrfTokenValid('update_status_' . $order->getId(), $request->request->get('_token'))) {
             $this->addFlash('error', 'Token de sécurité invalide.');
@@ -61,11 +63,49 @@ class OrderController extends AbstractController
             return $this->redirectToRoute('admin_order_show', ['id' => $order->getId()]);
         }
 
-        $order->setStatus($newStatus);
-        $order->setUpdatedAt(new \DateTimeImmutable());
-        $em->flush();
+        $wasCancelled = $order->getStatus() === 'cancelled';
+        $isCancelled  = $newStatus === 'cancelled';
 
-        $this->addFlash('success', sprintf('Commande #%d : statut mis à jour en « %s ».', $order->getId(), self::STATUSES[$newStatus]));
+        $ok = $em->wrapInTransaction(function () use ($order, $newStatus, $wasCancelled, $isCancelled, $stock): bool {
+            // une commande annulée rend ses pots ; la réactiver les reprend (s'il y en a assez)
+            if ($wasCancelled !== $isCancelled) {
+                foreach ($order->getOrderItems() as $item) {
+                    $stock->lock($item->getProductVariant());
+                }
+                if ($wasCancelled) {
+                    foreach ($order->getOrderItems() as $item) {
+                        if ($item->getProductVariant()->getStock() < $item->getQuantity()) {
+                            return false;
+                        }
+                    }
+                }
+                foreach ($order->getOrderItems() as $item) {
+                    $stock->move(
+                        $item->getProductVariant(),
+                        $isCancelled ? $item->getQuantity() : -$item->getQuantity(),
+                        $isCancelled ? 'cancel' : 'sale',
+                        $this->getUser(),
+                        $order,
+                    );
+                }
+            }
+
+            $order->setStatus($newStatus);
+            $order->setUpdatedAt(new \DateTimeImmutable());
+
+            return true;
+        });
+
+        if (!$ok) {
+            $this->addFlash('error', 'Impossible de réactiver cette commande : il n\'y a plus assez de stock pour certains produits.');
+            return $this->redirectToRoute('admin_order_show', ['id' => $order->getId()]);
+        }
+
+        $message = sprintf('Commande #%d : statut mis à jour en « %s ».', $order->getId(), self::STATUSES[$newStatus]);
+        if ($wasCancelled !== $isCancelled) {
+            $message .= $isCancelled ? ' Les pots ont été remis en stock.' : ' Les pots ont été retirés du stock.';
+        }
+        $this->addFlash('success', $message);
         return $this->redirectToRoute('admin_order_show', ['id' => $order->getId()]);
     }
 

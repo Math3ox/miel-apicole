@@ -26,6 +26,17 @@
                 </span>
             {% endif %}
         </div>
+
+        {% if product.outOfStock %}
+            <div class="absolute inset-0 bg-white/50"></div>
+            <span class="absolute top-3 right-3 bg-gray-800 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                Rupture de stock
+            </span>
+        {% elseif product.lowStock %}
+            <span class="absolute top-3 right-3 bg-orange-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                Plus que {{ product.totalStock }}
+            </span>
+        {% endif %}
     </div>
 
     <div class="p-4 flex flex-col flex-1">

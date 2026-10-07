@@ -1,0 +1,81 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block title %}Stock{% endblock %}
+{% block page_title %}Stock{% endblock %}
+
+{% block admin_content %}
+<div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div class="flex flex-wrap gap-2 text-sm">
+        <a href="{{ path('admin_stock_index') }}"
+           class="px-3 py-1.5 rounded-full border {{ filter is null ? 'bg-amber-600 border-amber-600 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-amber-400' }}">
+            Tout
+        </a>
+        <a href="{{ path('admin_stock_index', { filtre: 'bas' }) }}"
+           class="px-3 py-1.5 rounded-full border {{ filter == 'bas' ? 'bg-orange-500 border-orange-500 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-orange-400' }}">
+            Stock bas (≤ {{ seuil }}) · {{ alerts.bas }}
+        </a>
+        <a href="{{ path('admin_stock_index', { filtre: 'rupture' }) }}"
+           class="px-3 py-1.5 rounded-full border {{ filter == 'rupture' ? 'bg-red-600 border-red-600 text-white' : 'bg-white border-gray-300 text-gray-700 hover:border-red-400' }}">
+            Rupture · {{ alerts.rupture }}
+        </a>
+    </div>
+    <a href="{{ path('admin_stock_history') }}" class="text-sm font-medium text-amber-700 hover:underline">
+        Historique des mouvements →
+    </a>
+</div>
+
+{% if variants is empty %}
+    <div class="bg-white rounded-lg border border-gray-200 p-12 text-center text-gray-400">
+        {{ filter ? 'Aucune variante dans cette catégorie, tout va bien.' : 'Aucune variante. Ajoutez-en depuis la fiche d\'un produit.' }}
+    </div>
+{% else %}
+    <div class="bg-white rounded-lg border border-gray-200 overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">Produit</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">Format</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">Stock</th>
+                    <th class="text-left px-4 py-3 font-medium text-gray-600">Mettre à jour</th>
+                    <th class="px-4 py-3"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for variant in variants %}
+                <tr id="variant-{{ variant.id }}" class="hover:bg-gray-50 target:bg-amber-50">
+                    <td class="px-4 py-3 font-medium text-gray-800">
+                        <a href="{{ path('admin_product_edit', { id: variant.product.id }) }}" class="hover:text-amber-700">{{ variant.product.name }}</a>
+                    </td>
+                    <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{{ variant.weight }} g</td>
+                    <td class="px-4 py-3">{{ include('admin/_stock_badge.html.twig', { variant: variant }) }}</td>
+                    <td class="px-4 py-3">
+                        <form method="POST" action="{{ path('admin_stock_move', { id: variant.id }) }}" class="flex flex-wrap items-center gap-2">
+                            <input type="hidden" name="_token" value="{{ csrf_token('stock') }}">
+                            <input type="hidden" name="filtre" value="{{ filter }}">
+                            <select name="action" class="border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                                {% for value, label in actions %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <input type="number" name="quantity" min="0" required placeholder="Pots"
+                                   class="w-20 border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                            <input type="text" name="comment" maxlength="255" placeholder="Note (facultatif)"
+                                   class="w-40 border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                            <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium px-3 py-1.5 rounded">
+                                Valider
+                            </button>
+                        </form>
+                    </td>
+                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                        <a href="{{ path('admin_stock_history', { variante: variant.id }) }}" class="text-xs text-gray-500 hover:text-amber-700">Historique</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p class="mt-3 text-xs text-gray-500">
+        Réassort : pots ajoutés. Perte / casse : pots retirés. Inventaire : le nombre de pots réellement comptés, le stock est corrigé pour correspondre.
+    </p>
+{% endif %}
+{% endblock %}

@@ -9,6 +9,9 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ProductVariantRepository::class)]
 class ProductVariant
 {
+    // en dessous de ce nombre de pots, le stock est signalé comme bas
+    public const LOW_STOCK_THRESHOLD = 5;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -61,11 +64,22 @@ class ProductVariant
         return $this->stock;
     }
 
+    // ne pas appeler directement : passer par StockManager pour garder l'historique
     public function setStock(int $stock): static
     {
         $this->stock = $stock;
 
         return $this;
+    }
+
+    public function isOutOfStock(): bool
+    {
+        return $this->stock <= 0;
+    }
+
+    public function isLowStock(): bool
+    {
+        return $this->stock > 0 && $this->stock <= self::LOW_STOCK_THRESHOLD;
     }
 
     public function getProduct(): ?Product

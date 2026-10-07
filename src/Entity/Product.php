@@ -225,6 +225,28 @@ class Product
         return $this;
     }
 
+    public function getTotalStock(): int
+    {
+        $total = 0;
+        foreach ($this->productVariants as $variant) {
+            $total += max(0, $variant->getStock());
+        }
+
+        return $total;
+    }
+
+    public function isOutOfStock(): bool
+    {
+        return $this->getTotalStock() === 0;
+    }
+
+    public function isLowStock(): bool
+    {
+        $total = $this->getTotalStock();
+
+        return $total > 0 && $total <= ProductVariant::LOW_STOCK_THRESHOLD;
+    }
+
     public function getReviews(): Collection
     {
         return $this->reviews;
