@@ -6,6 +6,7 @@ use App\Entity\Category;
 use App\Entity\Product;
 use App\Entity\ProductVariant;
 use App\Repository\CategoryRepository;
+use App\Repository\OrderItemRepository;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -102,6 +103,7 @@ class ProductController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         ProductRepository $productRepo,
+        OrderItemRepository $orderItemRepo,
     ): Response {
         $product = $productRepo->find($id);
         if (!$product) {
@@ -110,6 +112,11 @@ class ProductController extends AbstractController
 
         if (!$this->isCsrfTokenValid('delete_product_' . $id, $request->request->get('_token'))) {
             $this->addFlash('error', 'Token de sécurité invalide.');
+            return $this->redirectToRoute('admin_product_index');
+        }
+
+        if ($orderItemRepo->isProductOrdered($product)) {
+            $this->addFlash('error', 'Ce produit a déjà été commandé : il ne peut pas être supprimé (commandes et factures). Passez le stock de ses variantes à 0 pour le retirer de la vente.');
             return $this->redirectToRoute('admin_product_index');
         }
 
@@ -134,6 +141,7 @@ class ProductController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         ProductRepository $productRepo,
+        OrderItemRepository $orderItemRepo,
     ): Response {
         $product = $productRepo->find($id);
         if (!$product) {
@@ -146,7 +154,9 @@ class ProductController extends AbstractController
         }
 
         $variant = $em->find(ProductVariant::class, $variantId);
-        if ($variant && $variant->getProduct() === $product) {
+        if ($variant && $orderItemRepo->isVariantOrdered($variant)) {
+            $this->addFlash('error', 'Cette variante a déjà été commandée : elle ne peut pas être supprimée. Passez son stock à 0 pour la retirer de la vente.');
+        } elseif ($variant && $variant->getProduct() === $product) {
             $product->removeProductVariant($variant);
             $em->remove($variant);
             $em->flush();
@@ -172,6 +182,9 @@ class ProductController extends AbstractController
 
         $errors = [];
 
+        if (!$this->isCsrfTokenValid('admin_product', $request->request->get('_token'))) {
+            $errors[] = 'Token de sécurité invalide, veuillez réessayer.';
+        }
         if ($data['name'] === '') {
             $errors[] = 'Le nom du produit est requis.';
         }

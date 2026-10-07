@@ -13,6 +13,13 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/admin/utilisateurs', name: 'admin_user_')]
 class UserController extends AbstractController
 {
+    // '' = simple client (ROLE_USER est ajouté automatiquement par User::getRoles)
+    public const ROLES = [
+        ''                => 'Client',
+        'ROLE_APICULTEUR' => 'Apiculteur',
+        'ROLE_ADMIN'      => 'Administrateur',
+    ];
+
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(UserRepository $userRepo): Response
     {
@@ -37,8 +44,12 @@ class UserController extends AbstractController
 
             $firstName = trim($request->request->get('firstName', ''));
             $lastName  = trim($request->request->get('lastName', ''));
-            $isAdmin   = $request->request->has('isAdmin');
+            $role      = $request->request->get('role', '');
             $isActive  = $request->request->has('isActive');
+
+            if (!array_key_exists($role, self::ROLES)) {
+                $errors[] = 'Rôle invalide.';
+            }
 
             if ($firstName === '') {
                 $errors[] = 'Le prénom est requis.';
@@ -48,14 +59,14 @@ class UserController extends AbstractController
             }
 
             $isSelf = $user === $this->getUser();
-            if ($isSelf && (!$isAdmin || !$isActive)) {
+            if ($isSelf && ($role !== 'ROLE_ADMIN' || !$isActive)) {
                 $errors[] = 'Vous ne pouvez pas retirer votre propre rôle admin ni désactiver votre compte.';
             }
 
             if (empty($errors)) {
                 $user->setFirstName($firstName);
                 $user->setLastName($lastName);
-                $user->setRoles($isAdmin ? ['ROLE_ADMIN'] : []);
+                $user->setRoles($role !== '' ? [$role] : []);
                 $user->setIsActive($isActive);
                 $em->flush();
 
@@ -64,9 +75,19 @@ class UserController extends AbstractController
             }
         }
 
+        $currentRole = '';
+        foreach (['ROLE_ADMIN', 'ROLE_APICULTEUR'] as $r) {
+            if (in_array($r, $user->getRoles(), true)) {
+                $currentRole = $r;
+                break;
+            }
+        }
+
         return $this->render('admin/user/edit.html.twig', [
-            'user'   => $user,
-            'errors' => $errors,
+            'user'        => $user,
+            'errors'      => $errors,
+            'roles'       => self::ROLES,
+            'currentRole' => $currentRole,
         ]);
     }
 

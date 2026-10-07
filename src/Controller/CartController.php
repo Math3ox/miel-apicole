@@ -26,13 +26,22 @@ class CartController extends AbstractController
         $variantId = (int) $request->request->get('variant_id');
         $quantity  = max(1, (int) $request->request->get('quantity', 1));
 
-        if ($variantId > 0) {
-            $cart->add($variantId, $quantity);
-            $this->addFlash('success', 'Produit ajouté au panier.');
+        if (!$this->isCsrfTokenValid('cart', $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token de sécurité invalide.');
+        } elseif ($variantId > 0) {
+            if ($cart->add($variantId, $quantity)) {
+                $this->addFlash('success', 'Produit ajouté au panier.');
+            } else {
+                $this->addFlash('warning', 'Stock insuffisant : la quantité a été ajustée au stock disponible.');
+            }
         }
 
-        $referer = $request->headers->get('referer');
-        return $this->redirect($referer ?: $this->generateUrl('app_cart_index'));
+        // on ne revient sur la page precedente que si elle est sur notre site
+        $referer = (string) $request->headers->get('referer');
+        if (!str_starts_with($referer, $request->getSchemeAndHttpHost() . '/')) {
+            $referer = $this->generateUrl('app_cart_index');
+        }
+        return $this->redirect($referer);
     }
 
     #[Route('/modifier', name: 'update', methods: ['POST'])]
@@ -41,24 +50,36 @@ class CartController extends AbstractController
         $variantId = (int) $request->request->get('variant_id');
         $quantity  = (int) $request->request->get('quantity');
 
-        if ($variantId > 0) {
-            $cart->update($variantId, $quantity);
+        if (!$this->isCsrfTokenValid('cart', $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token de sécurité invalide.');
+        } elseif ($variantId > 0 && !$cart->update($variantId, $quantity)) {
+            $this->addFlash('warning', 'Stock insuffisant : la quantité a été ajustée au stock disponible.');
         }
 
         return $this->redirectToRoute('app_cart_index');
     }
 
     #[Route('/supprimer/{variantId}', name: 'remove', methods: ['POST'])]
-    public function remove(int $variantId, CartService $cart): Response
+    public function remove(int $variantId, Request $request, CartService $cart): Response
     {
+        if (!$this->isCsrfTokenValid('cart', $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token de sécurité invalide.');
+            return $this->redirectToRoute('app_cart_index');
+        }
+
         $cart->remove($variantId);
         $this->addFlash('success', 'Article retiré du panier.');
         return $this->redirectToRoute('app_cart_index');
     }
 
     #[Route('/vider', name: 'clear', methods: ['POST'])]
-    public function clear(CartService $cart): Response
+    public function clear(Request $request, CartService $cart): Response
     {
+        if (!$this->isCsrfTokenValid('cart', $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token de sécurité invalide.');
+            return $this->redirectToRoute('app_cart_index');
+        }
+
         $cart->clear();
         $this->addFlash('success', 'Panier vidé.');
         return $this->redirectToRoute('app_cart_index');

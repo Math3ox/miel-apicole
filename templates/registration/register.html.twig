@@ -22,6 +22,7 @@
             {% endif %}
 
             <form method="post" novalidate>
+                <input type="hidden" name="_token" value="{{ csrf_token('register') }}">
 
                 <div class="grid grid-cols-2 gap-4 mb-5">
                     <div>

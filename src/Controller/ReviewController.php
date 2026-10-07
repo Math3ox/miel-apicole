@@ -35,6 +35,11 @@ class ReviewController extends AbstractController
             return $redirect;
         }
 
+        if ($em->getRepository(Review::class)->count(['product' => $product, 'user' => $this->getUser()]) > 0) {
+            $this->addFlash('error', 'Vous avez déjà laissé un avis sur ce produit.');
+            return $redirect;
+        }
+
         $review = new Review();
         $review->setProduct($product);
         $review->setUser($this->getUser());

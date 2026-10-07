@@ -12,12 +12,12 @@ class CartService
         private readonly ProductVariantRepository $variantRepository,
     ) {}
 
-    public function add(int $variantId, int $quantity = 1): void
+    // renvoie false si le stock ne suffit pas (la quantité est alors plafonnée au stock)
+    public function add(int $variantId, int $quantity = 1): bool
     {
         $cart = $this->getRawCart();
         // si le produit est deja dans le panier on ajoute la quantité, sinon on part de 0
-        $cart[$variantId] = ($cart[$variantId] ?? 0) + $quantity;
-        $this->save($cart);
+        return $this->update($variantId, ($cart[$variantId] ?? 0) + $quantity);
     }
 
     public function remove(int $variantId): void
@@ -27,15 +27,22 @@ class CartService
         $this->save($cart);
     }
 
-    public function update(int $variantId, int $quantity): void
+    // renvoie false si le stock ne suffit pas (la quantité est alors plafonnée au stock)
+    public function update(int $variantId, int $quantity): bool
     {
-        $cart = $this->getRawCart();
-        if ($quantity <= 0) {
+        $cart    = $this->getRawCart();
+        $variant = $this->variantRepository->find($variantId);
+        $stock   = $variant?->getStock() ?? 0;
+        $kept    = min($quantity, $stock);
+
+        if ($kept <= 0) {
             unset($cart[$variantId]);
         } else {
-            $cart[$variantId] = $quantity;
+            $cart[$variantId] = $kept;
         }
         $this->save($cart);
+
+        return $quantity <= $stock;
     }
 
     public function clear(): void

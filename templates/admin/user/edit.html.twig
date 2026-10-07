@@ -39,11 +39,16 @@
             </div>
         </div>
 
-        <label class="flex items-center gap-3 text-sm text-gray-700">
-            <input type="checkbox" name="isAdmin" {{ 'ROLE_ADMIN' in user.roles ? 'checked' }}
-                   class="rounded border-gray-300 text-amber-600 focus:ring-amber-400">
-            Administrateur
-        </label>
+        <div>
+            <label for="role" class="block text-sm font-medium text-gray-700 mb-1.5">Rôle</label>
+            <select id="role" name="role"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                {% for value, label in roles %}
+                    <option value="{{ value }}" {{ value == currentRole ? 'selected' }}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <p class="mt-1 text-xs text-gray-500">Apiculteur : produits, catégories, commandes et avis. Administrateur : tout, y compris les utilisateurs.</p>
+        </div>
 
         <label class="flex items-center gap-3 text-sm text-gray-700">
             <input type="checkbox" name="isActive" {{ user.isActive ? 'checked' }}

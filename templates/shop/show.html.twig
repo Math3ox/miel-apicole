@@ -131,6 +131,7 @@
             {% endif %}
 
             <form method="POST" action="{{ path('app_cart_add') }}" id="add-to-cart-form">
+                <input type="hidden" name="_token" value="{{ csrf_token('cart') }}">
                 <input type="hidden" name="variant_id" id="selected-variant-id"
                        value="{{ product.productVariants|length > 0 ? product.productVariants|first.id : '' }}">
                 <input type="hidden" name="quantity" value="1">

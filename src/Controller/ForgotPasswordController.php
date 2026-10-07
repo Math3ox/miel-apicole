@@ -21,6 +21,11 @@ class ForgotPasswordController extends AbstractController
         MailerService $mailer,
     ): Response {
         if ($request->isMethod('POST')) {
+            if (!$this->isCsrfTokenValid('forgot_password', $request->request->get('_token'))) {
+                $this->addFlash('error', 'Token de sécurité invalide, veuillez réessayer.');
+                return $this->redirectToRoute('app_forgot_password');
+            }
+
             $email = trim($request->request->get('email', ''));
             $user = $email !== '' ? $userRepo->findOneBy(['email' => $email]) : null;
 
@@ -65,6 +70,9 @@ class ForgotPasswordController extends AbstractController
             $password = $request->request->get('password', '');
             $confirm  = $request->request->get('passwordConfirm', '');
 
+            if (!$this->isCsrfTokenValid('reset_password', $request->request->get('_token'))) {
+                $errors[] = 'Token de sécurité invalide, veuillez réessayer.';
+            }
             if (strlen($password) < 8) {
                 $errors[] = 'Le mot de passe doit contenir au moins 8 caractères.';
             }

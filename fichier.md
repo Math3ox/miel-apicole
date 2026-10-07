@@ -7,10 +7,9 @@
 - Conteneurs : Podman (PHP-FPM, Nginx, MySQL, phpMyAdmin)
 - Node : AssetMapper (pas Webpack)
 
-## Règles absolues
-- INTERDICTION d'utiliser make:auth ou tout outil auto-généré de Symfony pour l'authentification
-- INTERDICTION d'utiliser les outils Symfony auto-générés pour l'envoi de mails
-- Tout doit être codé manuellement (controllers, formulaires, sessions, mailer)
+## Règles
+- Les contraintes du projet d'école (tout coder à la main, pas de make:*) sont levées depuis octobre 2026 :
+  les outils et bundles Symfony peuvent être utilisés.
 
 ## Entités Doctrine existantes
 - User (id, email, password, roles, firstName, lastName, createdAt)

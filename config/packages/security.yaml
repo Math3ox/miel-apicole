@@ -27,8 +27,13 @@ security:
                 path: app_logout
                 target: app_home
 
+    # l'admin a tous les droits de l'apiculteur, plus la gestion des utilisateurs
+    role_hierarchy:
+        ROLE_ADMIN: ROLE_APICULTEUR
+
     access_control:
-        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/admin/utilisateurs, roles: ROLE_ADMIN }
+        - { path: ^/admin, roles: ROLE_APICULTEUR }
         - { path: ^/compte, roles: ROLE_USER }
 
 when@test:

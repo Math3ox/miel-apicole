@@ -31,6 +31,9 @@ class CategoryController extends AbstractController
         if ($request->isMethod('POST')) {
             $data   = $this->extractData($request);
             $errors = $this->validate($data, $em);
+            if (!$this->isCsrfTokenValid('admin_category', $request->request->get('_token'))) {
+                $errors[] = 'Token de sécurité invalide, veuillez réessayer.';
+            }
 
             if (empty($errors)) {
                 $category = new Category();
@@ -68,6 +71,9 @@ class CategoryController extends AbstractController
         if ($request->isMethod('POST')) {
             $data   = $this->extractData($request);
             $errors = $this->validate($data, $em, $category->getId());
+            if (!$this->isCsrfTokenValid('admin_category', $request->request->get('_token'))) {
+                $errors[] = 'Token de sécurité invalide, veuillez réessayer.';
+            }
 
             if (empty($errors)) {
                 $this->hydrate($category, $data, $em, $category->getId());

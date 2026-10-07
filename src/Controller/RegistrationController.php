@@ -36,6 +36,9 @@ class RegistrationController extends AbstractController
                 'passwordConfirm' => $request->request->get('passwordConfirm', ''),
             ];
 
+            if (!$this->isCsrfTokenValid('register', $request->request->get('_token'))) {
+                $errors[] = 'Token de sécurité invalide, veuillez réessayer.';
+            }
             if (empty($data['firstName'])) {
                 $errors[] = 'Le prénom est requis.';
             }

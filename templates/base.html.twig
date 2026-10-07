@@ -64,7 +64,7 @@
                 {% if app.user %}
                     <div class="hidden md:flex items-center gap-3 text-sm">
                         <span class="text-gray-500">Bonjour, <strong class="text-gray-700">{{ app.user.firstName }}</strong></span>
-                        {% if is_granted('ROLE_ADMIN') %}
+                        {% if is_granted('ROLE_APICULTEUR') %}
                             <a href="{{ path('admin_dashboard') }}" class="text-amber-600 hover:text-amber-700 font-medium transition-colors">
                                 Admin
                             </a>
@@ -99,7 +99,7 @@
             <hr class="border-amber-100">
             {% if app.user %}
                 <a href="{{ path('app_account_index') }}" class="block hover:text-amber-600">Mon compte</a>
-                {% if is_granted('ROLE_ADMIN') %}
+                {% if is_granted('ROLE_APICULTEUR') %}
                     <a href="{{ path('admin_dashboard') }}" class="block text-amber-600 font-semibold">Admin</a>
                 {% endif %}
                 <a href="{{ path('app_logout') }}" class="block hover:text-amber-600">Déconnexion</a>
