@@ -103,8 +103,11 @@
 
                     <button type="submit"
                             class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3.5 rounded-lg text-sm">
-                        Confirmer la commande — {{ total|number_format(2, ',', ' ') }} €
+                        Payer {{ total|number_format(2, ',', ' ') }} €
                     </button>
+                    <p class="mt-2 text-center text-xs text-gray-400">
+                        Paiement sécurisé par Stripe (carte bancaire{{ ' ' }}ou autres moyens proposés). Vos coordonnées bancaires ne transitent pas par notre site.
+                    </p>
                 </form>
             </div>
         </div>

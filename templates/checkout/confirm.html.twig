@@ -1,20 +1,33 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Commande confirmée{% endblock %}
+{% block title %}{{ order.paid ? 'Commande confirmée' : 'Commande n°' ~ order.id }}{% endblock %}
 
 {% block body %}
 <div class="max-w-2xl mx-auto px-6 py-14">
 
     <div class="text-center mb-10">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-            </svg>
-        </div>
-        <h1 class="text-2xl font-bold text-gray-900 mb-2">Commande confirmée !</h1>
-        <p class="text-gray-500 text-sm">
-            Merci pour votre achat. Votre commande n°<strong class="text-gray-700">#{{ order.id }}</strong> a bien été enregistrée.
-        </p>
+        {% if order.paid %}
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Paiement reçu, commande confirmée !</h1>
+            <p class="text-gray-500 text-sm">
+                Merci pour votre achat. Votre commande n°<strong class="text-gray-700">#{{ order.id }}</strong> a bien été payée.
+            </p>
+        {% elseif order.status == 'cancelled' %}
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Commande annulée</h1>
+            <p class="text-gray-500 text-sm">
+                La commande n°<strong class="text-gray-700">#{{ order.id }}</strong> n'a pas été payée à temps et a été annulée. Rien n'a été débité.
+            </p>
+        {% else %}
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Paiement en cours de confirmation…</h1>
+            <p class="text-gray-500 text-sm">
+                Nous attendons la confirmation de votre banque pour la commande n°<strong class="text-gray-700">#{{ order.id }}</strong>.
+                Actualisez la page dans quelques secondes ; vous recevrez un email dès qu'elle sera confirmée.
+            </p>
+        {% endif %}
     </div>
 
     <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
@@ -35,7 +48,7 @@
         </div>
 
         <div class="border-t border-gray-100 pt-4 flex justify-between font-bold text-gray-900">
-            <span>Total payé</span>
+            <span>{{ order.paid ? 'Total payé' : 'Total' }}</span>
             <span class="text-amber-700">{{ order.totalPrice|number_format(2, ',', ' ') }} €</span>
         </div>
     </div>
@@ -50,17 +63,19 @@
         </address>
     </div>
 
-    {% if order.guest %}
+    {% if order.paid %}
         <p class="text-center text-sm text-gray-500 mb-6">
             Un email de confirmation avec la facture a été envoyé à <strong class="text-gray-700">{{ order.customerEmail }}</strong>.
         </p>
     {% endif %}
 
     <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <a href="{{ path('app_checkout_invoice', { id: order.id }) }}"
-           class="inline-block text-center bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-3 rounded-lg">
-            Télécharger la facture
-        </a>
+        {% if order.paid %}
+            <a href="{{ path('app_checkout_invoice', { id: order.id }) }}"
+               class="inline-block text-center bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-3 rounded-lg">
+                Télécharger la facture
+            </a>
+        {% endif %}
         {% if order.guest %}
             <a href="{{ path('app_register') }}"
                class="inline-block text-center bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold px-6 py-3 rounded-lg">

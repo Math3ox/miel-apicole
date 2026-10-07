@@ -55,6 +55,13 @@ class Order
     #[ORM\Column(length: 180, nullable: true)]
     private ?string $guestEmail = null;
 
+    // session de paiement Stripe Checkout liée à la commande
+    #[ORM\Column(length: 255, nullable: true, unique: true)]
+    private ?string $stripeSessionId = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $paidAt = null;
+
     #[ORM\OneToMany(targetEntity: OrderItem::class, mappedBy: 'orderRef', orphanRemoval: true)]
     private Collection $orderItems;
 
@@ -156,6 +163,35 @@ class Order
         $this->guestEmail = $guestEmail;
 
         return $this;
+    }
+
+    public function getStripeSessionId(): ?string
+    {
+        return $this->stripeSessionId;
+    }
+
+    public function setStripeSessionId(?string $stripeSessionId): static
+    {
+        $this->stripeSessionId = $stripeSessionId;
+
+        return $this;
+    }
+
+    public function getPaidAt(): ?\DateTimeImmutable
+    {
+        return $this->paidAt;
+    }
+
+    public function setPaidAt(?\DateTimeImmutable $paidAt): static
+    {
+        $this->paidAt = $paidAt;
+
+        return $this;
+    }
+
+    public function isPaid(): bool
+    {
+        return $this->paidAt !== null;
     }
 
     public function isGuest(): bool

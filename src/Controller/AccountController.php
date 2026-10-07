@@ -48,6 +48,10 @@ class AccountController extends AbstractController
     {
         $this->denyUnlessOwner($order);
 
+        if (!$order->isPaid()) {
+            throw $this->createNotFoundException('Pas de facture pour une commande non payée.');
+        }
+
         return new Response(
             $invoices->generate($order),
             Response::HTTP_OK,

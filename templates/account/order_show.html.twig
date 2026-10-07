@@ -38,6 +38,7 @@
             </div>
             <p class="text-sm text-gray-500 mt-1">Passée le {{ order.createdAt|date('d/m/Y à H:i') }}</p>
         </div>
+        {% if order.paid %}
         <a href="{{ path('app_account_invoice', { id: order.id }) }}"
            class="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold px-5 py-2.5 rounded-lg">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -45,6 +46,7 @@
             </svg>
             Télécharger la facture
         </a>
+        {% endif %}
     </div>
 
     <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">

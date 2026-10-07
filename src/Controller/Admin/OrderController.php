@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class OrderController extends AbstractController
 {
     public const STATUSES = [
-        'pending'   => 'En attente',
+        'pending'   => 'En attente de paiement',
         'paid'      => 'Payée',
         'shipped'   => 'Expédiée',
         'delivered' => 'Livrée',
@@ -92,6 +92,11 @@ class OrderController extends AbstractController
 
             $order->setStatus($newStatus);
             $order->setUpdatedAt(new \DateTimeImmutable());
+
+            // passée à la main en payée/expédiée/livrée (ex. paiement en direct) : on note le paiement
+            if (in_array($newStatus, ['paid', 'shipped', 'delivered'], true) && !$order->isPaid()) {
+                $order->setPaidAt(new \DateTimeImmutable());
+            }
 
             return true;
         });
