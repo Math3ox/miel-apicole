@@ -53,3 +53,4 @@ Le rôle se change dans Admin › Utilisateurs. Premier admin, en SQL :
 - Mot de passe oublié : `symfonycasts/reset-password-bundle` (lien valable 1 h, une demande max toutes les 15 min). Config dans `config/packages/reset_password.yaml`.
 - Factures PDF via Dompdf (`InvoiceGenerator`). Mails via Symfony Mailer (`MailerService`) et des templates dans `templates/emails/`.
 - Notes de conception d'origine : `fichier.md`.
+- Ce qu'il reste à faire : `ROADMAP.md`.
